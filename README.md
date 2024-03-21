@@ -4,10 +4,10 @@ This Tool can be helpful during FIrewall Review Testing for checking CDE and OOS
 
 
 Step 1 : Extract all Tables from Nipper 
-Step 2 : Use STAGE 3 Script to make tables unique
-Step 3 : Copy Firewall ruleset in Excel and pest the step 2 result there, also copy services and IP address from Nipper Report
-Step 4 : Use the STAGE 2 script. Large lines cannot be copied and pasted, so they need to be handled manually.
-Step 5: You will see IPs and subnets in all Source & Destination fields. Use Firewall-review script to find CDE & OOS IPs and Subnets.
+Step 2 : Use STAGE 3 Script to make tables unique 
+Step 3 : Copy Firewall ruleset in Excel and pest the step 2 result there, also copy services and IP address from Nipper Report. 
+Step 4 : Use the STAGE 2 script. Large lines cannot be copied and pasted, so they need to be handled manually. 
+Step 5: You will see IPs and subnets in all Source & Destination fields. Use Firewall-review script to find CDE & OOS IPs and Subnets. 
 
 # VBS SCRIPT - STAGE 1 : Find and Replace
 ```
