@@ -109,6 +109,7 @@ End Sub
 
 # VBS Script - Colourful Matching
 
+```
 Sub HighlightIPMatches()
     Dim ws As Worksheet
     Dim rngIPs As Range
@@ -199,8 +200,6 @@ Function IsIPInString(IP As String, str As String) As Boolean
     Next part
     IsIPInString = False
 End Function
-
-
 ```
 
 1) CDE_Source       - Red                # In next rounds if found red highlited colour, it will be turn into Dark Red (Consider it as CDE_Source+OOS_Source= Both_Source)
