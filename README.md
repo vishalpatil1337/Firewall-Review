@@ -107,4 +107,55 @@ Sub CombineNames()
 End Sub
 ```
 
- 
+ VBS Script - Colourful Matching
+
+ ```
+Sub HighlightIPMatches()
+    Dim ws As Worksheet
+    Dim rngIPs As Range
+    Dim rngCheck As Range
+    Dim cellIP As Range
+    Dim cellCheck As Range
+    Dim IP As String
+    Dim checkValue As String
+    
+    ' Set the active worksheet
+    Set ws = ActiveSheet
+    
+    ' Prompt user to select the range with IP addresses (K column)
+    On Error Resume Next
+    Set rngIPs = Application.InputBox("Select the range of IP addresses", "Select Range", Type:=8)
+    If rngIPs Is Nothing Then Exit Sub
+    Debug.Print "IP range selected: " & rngIPs.Address
+    
+    ' Prompt user to select the range to check (D column)
+    Set rngCheck = Application.InputBox("Select the range to check against", "Select Range", Type:=8)
+    If rngCheck Is Nothing Then Exit Sub
+    Debug.Print "Check range selected: " & rngCheck.Address
+    On Error GoTo 0
+    
+    ' Loop through each cell in the IP range
+    For Each cellIP In rngIPs
+        IP = Trim(cellIP.Value)
+        If IP <> "" Then
+            Debug.Print "Checking IP: " & IP
+            ' Loop through each cell in the check range
+            For Each cellCheck In rngCheck
+                checkValue = cellCheck.Value
+                ' Check if the IP is part of the string in the check range
+                If InStr(1, checkValue, IP, vbTextCompare) > 0 Then
+                    ' Highlight matching cells in red
+                    cellIP.Interior.Color = RGB(255, 0, 0)
+                    cellCheck.Interior.Color = RGB(255, 0, 0)
+                    Debug.Print "Match found: " & IP & " in " & checkValue
+                End If
+            Next cellCheck
+        End If
+    Next cellIP
+    
+    ' Notify the user that the script has completed
+    MsgBox "Highlighting complete"
+End Sub
+
+
+```
