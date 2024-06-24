@@ -98,7 +98,10 @@ Sub CombineNames()
     
     ' Adjust column widths for better visibility
     wsOutput.Columns("A:B").AutoFit
-    
+
+
+# VBS Maching With Colour IP - Using for Identifying CDE,OOS Subnets
+
     MsgBox "Combining names completed.", vbInformation
     
 End Sub
