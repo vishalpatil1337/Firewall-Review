@@ -109,7 +109,6 @@ End Sub
 
 # VBS Script - Colourful Matching
 
- ```
 Sub HighlightIPMatches()
     Dim ws As Worksheet
     Dim rngIPs As Range
@@ -118,44 +117,93 @@ Sub HighlightIPMatches()
     Dim cellCheck As Range
     Dim IP As String
     Dim checkValue As String
+    Dim colorIndex As Integer
+    Dim continueHighlight As VbMsgBoxResult
+    
+    ' Colors: 1st = Red, 2nd = Green, 3rd = Yellow, 4th = Blue
+    Dim colors As Variant
+    colors = Array(RGB(255, 0, 0), RGB(0, 255, 0), RGB(255, 255, 0), RGB(0, 0, 255))
+    colorIndex = 0
     
     ' Set the active worksheet
     Set ws = ActiveSheet
     
-    ' Prompt user to select the range with IP addresses (K column)
-    On Error Resume Next
-    Set rngIPs = Application.InputBox("Select the range of IP addresses", "Select Range", Type:=8)
-    If rngIPs Is Nothing Then Exit Sub
-    Debug.Print "IP range selected: " & rngIPs.Address
-    
-    ' Prompt user to select the range to check (D column)
-    Set rngCheck = Application.InputBox("Select the range to check against", "Select Range", Type:=8)
-    If rngCheck Is Nothing Then Exit Sub
-    Debug.Print "Check range selected: " & rngCheck.Address
-    On Error GoTo 0
-    
-    ' Loop through each cell in the IP range
-    For Each cellIP In rngIPs
-        IP = Trim(cellIP.Value)
-        If IP <> "" Then
-            Debug.Print "Checking IP: " & IP
-            ' Loop through each cell in the check range
-            For Each cellCheck In rngCheck
-                checkValue = cellCheck.Value
-                ' Check if the IP is part of the string in the check range
-                If InStr(1, checkValue, IP, vbTextCompare) > 0 Then
-                    ' Highlight matching cells in red
-                    cellIP.Interior.Color = RGB(255, 0, 0)
-                    cellCheck.Interior.Color = RGB(255, 0, 0)
-                    Debug.Print "Match found: " & IP & " in " & checkValue
-                End If
-            Next cellCheck
-        End If
-    Next cellIP
-    
-    ' Notify the user that the script has completed
-    MsgBox "Highlighting complete"
+    Do
+        ' Prompt user to select the range with IP addresses (K column)
+        On Error Resume Next
+        Set rngIPs = Application.InputBox("Select the range of IP addresses", "Select Range", Type:=8)
+        If rngIPs Is Nothing Then Exit Sub
+        Debug.Print "IP range selected: " & rngIPs.Address
+        
+        ' Prompt user to select the range to check (D column)
+        Set rngCheck = Application.InputBox("Select the range to check against", "Select Range", Type:=8)
+        If rngCheck Is Nothing Then Exit Sub
+        Debug.Print "Check range selected: " & rngCheck.Address
+        On Error GoTo 0
+        
+        ' Loop through each cell in the IP range
+        For Each cellIP In rngIPs
+            IP = Trim(cellIP.Value)
+            If IP <> "" Then
+                Debug.Print "Checking IP: " & IP
+                ' Loop through each cell in the check range
+                For Each cellCheck In rngCheck
+                    checkValue = cellCheck.Value
+                    ' Check if the IP is part of the string in the check range
+                    If InStr(1, checkValue, IP, vbTextCompare) > 0 Then
+                        ' Check current color and adjust if necessary
+                        If cellIP.Interior.Color = RGB(255, 0, 0) And colorIndex = 1 Then
+                            cellIP.Interior.Color = RGB(139, 0, 0) ' Dark Red
+                            cellCheck.Interior.Color = RGB(139, 0, 0)
+                        ElseIf cellIP.Interior.Color = RGB(0, 255, 0) And colorIndex = 1 Then
+                            cellIP.Interior.Color = RGB(144, 238, 144) ' Light Green
+                            cellCheck.Interior.Color = RGB(144, 238, 144)
+                        Else
+                            ' Highlight matching cells with the current color
+                            cellIP.Interior.Color = colors(colorIndex)
+                            cellCheck.Interior.Color = colors(colorIndex)
+                        End If
+                        Debug.Print "Match found: " & IP & " in " & checkValue
+                    End If
+                Next cellCheck
+            End If
+        Next cellIP
+        
+        ' Notify the user that the current highlighting is complete
+        MsgBox "Highlighting complete with color " & colorIndex + 1
+        
+        ' Increment the color index for the next run
+        colorIndex = (colorIndex + 1) Mod 4
+        
+        ' Ask the user if they want to run the script again with a different color
+        continueHighlight = MsgBox("Do you want to highlight another set with a different color?", vbYesNo)
+        
+    Loop While continueHighlight = vbYes
 End Sub
+
+Function IsIPInString(IP As String, str As String) As Boolean
+    Dim arrParts() As String
+    Dim part As Variant
+    Dim arrSubParts() As String
+    Dim subpart As Variant
+    
+    arrParts = Split(str, ";")
+    For Each part In arrParts
+        arrSubParts = Split(part, ",")
+        For Each subpart In arrSubParts
+            If Trim(subpart) = IP Then
+                IsIPInString = True
+                Exit Function
+            End If
+        Next subpart
+    Next part
+    IsIPInString = False
+End Function
 
 
 ```
+
+1) CDE_Source       - Red                # In next rounds if found red highlited colour, it will be turn into Dark Red (Consider it as CDE_Source+OOS_Source= Both_Source)
+2) OOS_Destination  - Green              # In next rounds if Dark Green colour, It will turn into Light Green (Consider it as OOS_Destination+CDE_Destination= Both_Destination) 
+3) OOS_Source       - Yellow
+4) CDE_Destination  - Blue
