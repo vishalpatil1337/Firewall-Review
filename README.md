@@ -107,7 +107,7 @@ Sub CombineNames()
 End Sub
 ```
 
- VBS Script - Colourful Matching
+# VBS Script - Colourful Matching
 
  ```
 Sub HighlightIPMatches()
