@@ -29,9 +29,11 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   running_script:
     step_1: "Open the command line or terminal."
     step_2: "Navigate to the project directory:"
-      command: "cd firewall-rule-checker"
+      command: "cd firewall-review"
     step_3: "Execute the script:"
-      command: "python firewall-rule-checker.py"
+      command: "python FW-Review-Starter.py"
+  
+  
   script_flow: |
     - The script will guide you through various steps.
     - For each step, you’ll be asked to confirm if you wish to proceed by typing 'y' or 'n'.
