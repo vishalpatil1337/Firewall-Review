@@ -62,7 +62,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   pip install xlsxwriter
 
 ## Usage:
-  running_script:
+  To run script:
    - step_1: "Open the command line or terminal."
    - step_2: "Navigate to the project directory:"
       command: "cd firewall-review"
