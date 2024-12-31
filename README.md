@@ -7,35 +7,35 @@ The **Firewall Rule Checker** is an automated Python-based script designed to ex
 
 rules_check:
 ```
-  - name: "Source-Specific to Destination-Any with Services-Any/Specific"
+  - 1: "Source-Specific to Destination-Any with Services-Any/Specific"
     description: >
       Ensures that specific source IPs or subnets are properly validated 
       against any destination with specific or any services.
-  - name: "Source-Specific to Destination-Specific with Services-Any"
+  - 2: "Source-Specific to Destination-Specific with Services-Any"
     description: >
       Verifies rules where specific source IPs communicate with specific 
       destination IPs or subnets using any services.
-  - name: "Source-Any to Destination-Specific with Services-Any/Specific"
+  - 3: "Source-Any to Destination-Specific with Services-Any/Specific"
     description: >
       Checks rules where any source IP communicates with specific destination 
       IPs or subnets for specific or any services.
-  - name: "Out of Scope Source to CDE Destination"
+  - 4: "Out of Scope Source to CDE Destination"
     description: >
       Analyzes and flags rules where out-of-scope sources are permitted to 
       access Cardholder Data Environment (CDE) destinations.
-  - name: "CDE Destination to Out of Scope Source"
+  - 5: "CDE Destination to Out of Scope Source"
     description: >
       Identifies rules where CDE destinations are accessible by out-of-scope 
       sources.
-  - name: "External IP/Subnet to Internal IP/Subnet"
+  - 6: "External IP/Subnet to Internal IP/Subnet"
     description: >
       Validates public-to-private rules for proper segregation and secure 
       communication.
-  - name: "Internal IP/Subnet to External IP/Subnet"
+  - 7: "Internal IP/Subnet to External IP/Subnet"
     description: >
       Examines private-to-public rules for compliance and potential data 
       leakage risks.
-  - name: "Source-Any to Destination-Any with Services-Any"
+  - 8: "Source-Any to Destination-Any with Services-Any"
     description: >
       Flags overly permissive rules where any source communicates with any 
       destination using any services.
