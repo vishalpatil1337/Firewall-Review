@@ -37,7 +37,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
     - For each step, you’ll be asked to confirm if you wish to proceed by typing 'y' or 'n'.
     - Logs and outputs will be generated, such as `Findings.xlsx`, `firewall_analysis_results.xlsx`, based on your input files and configurations.
 
-## script_steps:
+script_steps:
   - name: "startup.py"
     description: |
       Initializes the firewall configuration and generates the required text files and folders (cde.txt, oos.txt, etc.).
@@ -67,6 +67,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
       Checks public-to-private firewall rules and generates analysis reports.
   - note: |
       Each script is executed in sequence, with confirmation prompts to ensure the user is ready for the next step.
+
 
 
 
