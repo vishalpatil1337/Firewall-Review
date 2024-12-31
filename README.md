@@ -39,25 +39,17 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
 
 script_steps:
-  - name: "startup.py"
-    description: "Initializes the firewall configuration and generates the required text files and folders (cde.txt, oos.txt, etc.)."
-  - name: "format-changer.py"
-    description: "Converts firewall CSV files into Excel format."
-  - name: "all-in-one.maker-groups.py"
-    description: "Combines multiple groups into a single group."
-  - name: "replace.py"
-    description: "Checks and replaces group names in the firewall configuration."
-  - name: "replace-ao.py"
-    description: "Updates address objects in the modified firewall file."
-  - name: "Source and Destination Rules Check"
-    description: "Verifies various firewall rules like Source-Any, Destination-Any, and more."
-  - name: "cde-oos-subnet-extractor.py"
-    description: "Converts subnet ranges into IP addresses."
-  - name: "CDE-OOS-Checker"
-    description: "Validates CDE and OOS rules from an Excel file."
-  - name: "external-to-internal.py"
-    description: "Checks public-to-private firewall rules and generates analysis reports."
+  - name: "startup.py"          description: "Initializes firewall configuration and generates text files (cde.txt, oos.txt, etc.)"
+  - name: "format-changer.py"    description: "Converts firewall CSV files into Excel format"
+  - name: "all-in-one.maker-groups.py" description: "Combines multiple groups into a single group"
+  - name: "replace.py"           description: "Checks and replaces group names in the firewall configuration"
+  - name: "replace-ao.py"        description: "Updates address objects in the modified firewall file"
+  - name: "Source and Destination Rules Check" description: "Verifies firewall rules like Source-Any, Destination-Any, and more"
+  - name: "cde-oos-subnet-extractor.py" description: "Converts subnet ranges into IP addresses"
+  - name: "CDE-OOS-Checker"     description: "Validates CDE and OOS rules from an Excel file"
+  - name: "external-to-internal.py" description: "Checks public-to-private firewall rules and generates analysis reports"
   - note: "Each script is executed in sequence, with confirmation prompts to ensure the user is ready for the next step."
+
 
 
 
