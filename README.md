@@ -63,10 +63,10 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
 ## Usage:
   running_script:
-    step_1: "Open the command line or terminal."
-    step_2: "Navigate to the project directory:"
+   - step_1: "Open the command line or terminal."
+   - step_2: "Navigate to the project directory:"
       command: "cd firewall-review"
-    step_3: "Execute the script:"
+  -  step_3: "Execute the script:"
       ```command: "python FW-Review-Starter.py"```
   
 
