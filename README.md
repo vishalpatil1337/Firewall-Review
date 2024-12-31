@@ -1,30 +1,30 @@
-project_title: "Firewall Rule Checker"
+# README.txt for Firewall Rule Checker
 
-description: 
-  The **Firewall Rule Checker** is an automated Python-based script designed to execute multiple steps for validating and modifying firewall configurations. The script facilitates the execution of various Python modules in sequence, including tasks such as checking firewall rules, replacing address objects, and performing firewall analysis. This tool is ideal for network security professionals who need to streamline firewall rule checking and configuration modification processes.
+## Project Title:
+**Firewall Rule Checker**
 
-table_of_contents:
-  - "Prerequisites"
-  - "Installation Instructions"
-  - "Usage"
-  - "Script Steps"
-  - "Contributing"
-  - "License"
+## Description:
+The **Firewall Rule Checker** is an automated Python-based script designed to execute multiple steps for validating and modifying firewall configurations. The script facilitates the execution of various Python modules in sequence, including tasks such as checking firewall rules, replacing address objects, and performing firewall analysis. This tool is ideal for network security professionals who need to streamline firewall rule checking and configuration modification processes.
 
-prerequisites:
-  python_version: "Python 3.x (Python 3.6 or higher)"
-  libraries_required:
-    - "list of required Python libraries"  # Add the required libraries here
-  other_dependencies:
-    - "Ensure other scripts (startup.py, format-changer.py, etc.) are in the same directory or update file paths as necessary."
+---
 
-installation_instructions:
-  - step_1: "Clone the repository using the following Git command:"
-    command: "git clone https://github.com/yourusername/firewall-rule-checker.git"
-  - step_2: "Navigate to the project folder:"
-    command: "cd firewall-rule-checker"
-  - step_3: "Install the necessary dependencies:"
-    command: "pip install -r requirements.txt"
+## Table of Contents:
+1. [Prerequisites](#prerequisites)
+2. [Installation Instructions](#installation-instructions)
+3. [Usage](#usage)
+4. [Script Steps](#script-steps)
+5. [Contributing](#contributing)
+6. [License](#license)
+
+---
+
+## Prerequisites:
+Before running the **Firewall Rule Checker** script, ensure you have the following installed:
+
+- **Python 3.x**: Ensure you have Python 3.6 or higher installed.
+- **Required Python Libraries**: The script depends on some Python libraries. To install them, run:
+  ```bash
+  pip install -r requirements.txt
 
 usage:
   running_script:
