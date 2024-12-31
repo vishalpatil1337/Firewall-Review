@@ -38,13 +38,15 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   ---
 
   
-  ## script_flow: |
+  ## script_flow: 
     - The script will guide you through various steps.
     - For each step, you’ll be asked to confirm if you wish to proceed by typing 'y' or 'n'.
     - Logs and outputs will be generated, such as `Findings.xlsx`, `firewall_analysis_results.xlsx`, based on your input files and configurations.
 
 
-script_steps:
+---
+
+## script_steps:
   - name: "startup.py"          description: "Initializes firewall configuration and generates text files (cde.txt, oos.txt, etc.)"
   - name: "format-changer.py"    description: "Converts firewall CSV files into Excel format"
   - name: "all-in-one.maker-groups.py" description: "Combines multiple groups into a single group"
