@@ -58,16 +58,41 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
     description: "Checks public-to-private firewall rules and generates analysis reports."
   - note: "Each script is executed in sequence, with confirmation prompts to ensure the user is ready for the next step."
 
-## contributing:
-  steps:
-    - step_1: "Fork the repository and create a new branch:"
-      command: "git checkout -b feature-branch"
-    - step_2: "Make your changes and commit them:"
-      command: "git commit -m 'Add new feature'"
-    - step_3: "Push to your fork:"
-      command: "git push origin feature-branch"
-    - step_4: "Create a Pull Request."
-  note: "Before contributing, please ensure you have tested the changes locally and that they don’t break the existing functionality."
+## Contributing:
+
+We welcome contributions to the **Firewall Rule Checker**! Please follow these steps:
+
+### Step-by-Step Contribution Process:
+
+1. **Fork the repository and create a new branch:**
+   - **Command:**
+     ```bash
+     git checkout -b feature-branch
+     ```
+   - This creates a new branch for your feature or bug fix. Make sure to replace `feature-branch` with a meaningful name for your branch that describes the changes you're working on.
+
+2. **Make your changes and commit them:**
+   - **Command:**
+     ```bash
+     git commit -m 'Add new feature'
+     ```
+   - After making your changes to the code, use this command to commit them. Write a clear and concise commit message that describes the changes you've made. For example, `'Add validation for address objects'`.
+
+3. **Push to your fork:**
+   - **Command:**
+     ```bash
+     git push origin feature-branch
+     ```
+   - Push the changes you made in your branch to your forked repository.
+
+4. **Create a Pull Request:**
+   - Go to the repository page on GitHub.
+   - You should see an option to create a "Pull Request" (PR) from your branch.
+   - Provide a description of the changes you've made, and submit the PR for review.
+
+### Note:
+Before contributing, please ensure you have tested the changes locally and that they do not break the existing functionality. It’s important that the code you’re submitting works as intended and does not introduce any errors.
+
 
 
 ## contact:
