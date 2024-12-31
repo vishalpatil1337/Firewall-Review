@@ -58,6 +58,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
     description: "Checks public-to-private firewall rules and generates analysis reports."
   - note: "Each script is executed in sequence, with confirmation prompts to ensure the user is ready for the next step."
 
+
 ## Contributing:
 
 We welcome contributions to the **Firewall Rule Checker**! Please follow these steps:
