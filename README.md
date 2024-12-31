@@ -1,4 +1,4 @@
-# README.txt for Firewall Rule Checker
+# Firewall Rule Checker
 
 ## Project Title: **Firewall Rule Checker**
 
