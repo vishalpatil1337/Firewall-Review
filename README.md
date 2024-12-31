@@ -95,8 +95,8 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   - note: "Each script is executed in sequence, with confirmation prompts to ensure the user is ready for the next step."
 
 
-
+---
 
 ## Contact:
-  name: Vishal Patil
-  email: vp26781@gmail.com
+-  name: Vishal Patil
+-  email: vp26781@gmail.com
