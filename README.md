@@ -26,7 +26,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   ```bash
   pip install -r requirements.txt
 
-usage:
+## usage:
   running_script:
     step_1: "Open the command line or terminal."
     step_2: "Navigate to the project directory:"
@@ -38,7 +38,7 @@ usage:
     - For each step, you’ll be asked to confirm if you wish to proceed by typing 'y' or 'n'.
     - Logs and outputs will be generated, such as `Findings.xlsx`, `firewall_analysis_results.xlsx`, based on your input files and configurations.
 
-script_steps:
+## script_steps:
   - name: "startup.py"
     description: "Initializes the firewall configuration and generates the required text files and folders (cde.txt, oos.txt, etc.)."
   - name: "format-changer.py"
@@ -59,7 +59,7 @@ script_steps:
     description: "Checks public-to-private firewall rules and generates analysis reports."
   - note: "Each script is executed in sequence, with confirmation prompts to ensure the user is ready for the next step."
 
-contributing:
+## contributing:
   steps:
     - step_1: "Fork the repository and create a new branch:"
       command: "git checkout -b feature-branch"
@@ -71,6 +71,6 @@ contributing:
   note: "Before contributing, please ensure you have tested the changes locally and that they don’t break the existing functionality."
 
 
-contact:
+## contact:
   name: "Vishal Patil"
   email: "vp26781@gmail.com"
