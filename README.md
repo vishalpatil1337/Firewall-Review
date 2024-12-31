@@ -1,7 +1,6 @@
 # README.txt for Firewall Rule Checker
 
-## Project Title:
-**Firewall Rule Checker**
+## Project Title: **Firewall Rule Checker**
 
 ## Description:
 The **Firewall Rule Checker** is an automated Python-based script designed to execute multiple steps for validating and modifying firewall configurations. The script facilitates the execution of various Python modules in sequence, including tasks such as checking firewall rules, replacing address objects, and performing firewall analysis. This tool is ideal for network security professionals who need to streamline firewall rule checking and configuration modification processes.
