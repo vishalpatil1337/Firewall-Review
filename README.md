@@ -31,8 +31,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
     step_2: "Navigate to the project directory:"
       command: "cd firewall-review"
     step_3: "Execute the script:"
-      ```bash 
-      command: "python FW-Review-Starter.py"
+      ```command: "python FW-Review-Starter.py"```
   
   
   script_flow: |
