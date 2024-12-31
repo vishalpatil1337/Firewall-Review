@@ -5,29 +5,37 @@
 ## Description:
 The **Firewall Rule Checker** is an automated Python-based script designed to execute multiple steps for validating and modifying firewall configurations. The script facilitates the execution of various Python modules in sequence, including tasks such as checking firewall rules, replacing address objects, and performing firewall analysis. This tool is ideal for network security professionals who need to streamline firewall rule checking and configuration modification processes. The Firewall Rule Checker automates the process of analyzing firewall configurations to ensure compliance and highlight potential security risks. Below is a description of the rules checked by the script:
 
-Rules_check:
-  - name: "Source-Specific to Destination-Any with Services-Any/Specific"
+rules_checked:
+  1:
+    name: "Source-Specific to Destination-Any with Services-Any/Specific"
     description: |
       Ensures that specific source IPs or subnets are properly validated against any destination with specific or any services.
-  - name: "Source-Specific to Destination-Specific with Services-Any"
+  2:
+    name: "Source-Specific to Destination-Specific with Services-Any"
     description: |
       Verifies rules where specific source IPs communicate with specific destination IPs or subnets using any services.
-  - name: "Source-Any to Destination-Specific with Services-Any/Specific"
+  3:
+    name: "Source-Any to Destination-Specific with Services-Any/Specific"
     description: |
       Checks rules where any source IP communicates with specific destination IPs or subnets for specific or any services.
-  - name: "Out of Scope Source to CDE Destination"
+  4:
+    name: "Out of Scope Source to CDE Destination"
     description: |
       Analyzes and flags rules where out-of-scope sources are permitted to access Cardholder Data Environment (CDE) destinations.
-  - name: "CDE Destination to Out of Scope Source"
+  5:
+    name: "CDE Destination to Out of Scope Source"
     description: |
       Identifies rules where CDE destinations are accessible by out-of-scope sources.
-  - name: "External IP/Subnet to Internal IP/Subnet"
+  6:
+    name: "External IP/Subnet to Internal IP/Subnet"
     description: |
       Validates public-to-private rules for proper segregation and secure communication.
-  - name: "Internal IP/Subnet to External IP/Subnet"
+  7:
+    name: "Internal IP/Subnet to External IP/Subnet"
     description: |
       Examines private-to-public rules for compliance and potential data leakage risks.
-  - name: "Source-Any to Destination-Any with Services-Any"
+  8:
+    name: "Source-Any to Destination-Any with Services-Any"
     description: |
       Flags overly permissive rules where any source communicates with any destination using any services.
 
