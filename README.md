@@ -25,7 +25,6 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   pip install openpyxl
   pip install xlsxwriter
 
-
 ## usage:
   running_script:
     step_1: "Open the command line or terminal."
