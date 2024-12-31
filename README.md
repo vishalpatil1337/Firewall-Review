@@ -6,7 +6,7 @@
 The **Firewall Rule Checker** is an automated Python-based script designed to execute multiple steps for validating and modifying firewall configurations. The script facilitates the execution of various Python modules in sequence, including tasks such as checking firewall rules, replacing address objects, and performing firewall analysis. This tool is ideal for network security professionals who need to streamline firewall rule checking and configuration modification processes. The Firewall Rule Checker automates the process of analyzing firewall configurations to ensure compliance and highlight potential security risks. Below is a description of the rules checked by the script:
 
 rules_check:
-``
+```
   - name: "Source-Specific to Destination-Any with Services-Any/Specific"
     description: >
       Ensures that specific source IPs or subnets are properly validated 
@@ -39,7 +39,7 @@ rules_check:
     description: >
       Flags overly permissive rules where any source communicates with any 
       destination using any services.
- ``
+ ```
 
 ---
 
