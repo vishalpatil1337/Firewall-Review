@@ -21,7 +21,10 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 - **Python 3.x**: Ensure you have Python 3.6 or higher installed.
 - **Required Python Libraries**: The script depends on some Python libraries. To install them, run:
   ```bash
-  pip install -r requirements.txt
+  pip install pandas
+  pip install openpyxl
+  pip install xlsxwriter
+
 
 ## usage:
   running_script:
