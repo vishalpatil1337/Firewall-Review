@@ -33,8 +33,12 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
     step_3: "Execute the script:"
       ```command: "python FW-Review-Starter.py"```
   
+
+
+  ---
+
   
-  script_flow: |
+  ## script_flow: |
     - The script will guide you through various steps.
     - For each step, you’ll be asked to confirm if you wish to proceed by typing 'y' or 'n'.
     - Logs and outputs will be generated, such as `Findings.xlsx`, `firewall_analysis_results.xlsx`, based on your input files and configurations.
