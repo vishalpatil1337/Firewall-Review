@@ -38,10 +38,13 @@ else:
                 # Otherwise, store the index of the first occurrence
                 seen_values[col_b_value] = index
 
-        # Save the modified DataFrame back to the Excel file
+        # Save the modified DataFrame back to a new sheet in the Excel file
         with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-            df_sheet.to_excel(writer, index=False, sheet_name=sheet_name)
+            # Write original sheet
+            df[sheet_name].to_excel(writer, index=False, sheet_name=sheet_name)
+            # Write modified sheet
+            df_sheet.to_excel(writer, index=False, sheet_name='Modified_Sheet')
 
-        print("File updated successfully.")
+        print("File updated successfully and saved to 'Modified_Sheet'.")
     else:
         print("Columns 'Type' and 'Excel Row' not found in the sheet.")
