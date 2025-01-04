@@ -1,9 +1,11 @@
 import pandas as pd
+import re
 from tabulate import tabulate
 
-# Load the Excel file
+# Correct path to your Excel file
 file_path = 'modified_firewall_updated.xlsx'
 
+# Load the Excel file and handle errors
 try:
     df = pd.read_excel(file_path)
 except FileNotFoundError:
@@ -13,26 +15,30 @@ except Exception as e:
     print(f"Error loading the Excel file: {e}")
     exit(1)
 
-# Print the column names to understand the structure
-print("Column names in the DataFrame:")
-print(df.columns)
+# Normalize values to lowercase and treat 'any' and empty values as 'any'
+def normalize_value(value):
+    if isinstance(value, str):
+        # Strip out anything inside square brackets and then check for 'any'
+        value = re.sub(r'\[.*?\]', '', value).strip().lower()
+        # If the value contains 'any' or is empty, treat it as 'any'
+        if 'any' in value or value == '':
+            return 'any'
+    return value
 
 # Prepare a list to hold the results
 results = []
 
 # Check each rule in the DataFrame
 for index, row in df.iterrows():
-    # Normalize values to lowercase for case-insensitive comparison
-    source = str(row.get('Source', '')).strip().lower()  # Get the source from the DataFrame
-    destination = str(row.get('Destination', '')).strip().lower()  # Get the destination from the DataFrame
-    service = str(row.get('Service', '')).strip().lower()  # Get the service from the DataFrame
+    source = normalize_value(row.get('Source', ''))
+    destination = normalize_value(row.get('Destination', ''))
+    service = normalize_value(row.get('Service', ''))
 
     # Check if all are 'any'
     if source == 'any' and destination == 'any' and service == 'any':
-        # Add 2 to index to account for the header row and 1-based index
         results.append({
             "Row Number": index + 2,  # Adjust for 1-based index and header row
-            "Rule Name": row.get('Rule', 'N/A'),  # Adjust if there's a Rule Name column
+            "Rule Name": row.get('Rule', 'N/A'),
             "Source": source,
             "Destination": destination,
             "Service": service,
