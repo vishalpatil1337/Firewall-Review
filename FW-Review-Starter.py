@@ -106,6 +106,7 @@ def main():
     # 22. Execute CDE-OOS-Checker
     if echo_message("Step 22: Executing CDE-OOS-Checker..."):
         execute_script("CDE-OOS-Checker.py")
+     echo_message("Doing propper formatting for CDE and OOS rules...")
         execute_script("formating-findings.py")
         execute_script("formating-firewall_analysis_results.py")
 
