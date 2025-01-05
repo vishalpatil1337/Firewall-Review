@@ -17,21 +17,21 @@ else:
     print("First few rows of the sheet:")
     print(df_sheet.head())
 
-    # Check if the columns are named correctly (e.g., "Type" and "Excel Row")
-    if 'Type' in df_sheet.columns and 'Excel Row' in df_sheet.columns:
-        # Create a dictionary to track seen values in column "Excel Row"
+    # Check if the columns are named correctly (e.g., "Rule Type" and "Row Number")
+    if 'Rule Type' in df_sheet.columns and 'Row Number' in df_sheet.columns:
+        # Create a dictionary to track seen values in column "Row Number"
         seen_values = {}
         
         # Iterate through the rows
         for index, row in df_sheet.iterrows():
-            col_a_value = row['Type']
-            col_b_value = row['Excel Row']
+            col_a_value = row['Rule Type']
+            col_b_value = row['Row Number']
             
             # If the value in column B is already seen
             if col_b_value in seen_values:
                 # Modify the first occurrence of the value in column A
                 first_index = seen_values[col_b_value]
-                df_sheet.at[first_index, 'Type'] = df_sheet.at[first_index, 'Type'] + " - " + col_a_value
+                df_sheet.at[first_index, 'Rule Type'] = df_sheet.at[first_index, 'Rule Type'] + " - " + col_a_value
                 # Remove the second occurrence
                 df_sheet = df_sheet.drop(index)
             else:
@@ -47,4 +47,4 @@ else:
 
         print("File updated successfully and saved to 'Modified_Sheet'.")
     else:
-        print("Columns 'Type' and 'Excel Row' not found in the sheet.")
+        print("Columns 'Rule Type' and 'Row Number' not found in the sheet.")
