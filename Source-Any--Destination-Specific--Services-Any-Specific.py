@@ -3,7 +3,14 @@ from prettytable import PrettyTable  # Install with `pip install prettytable`
 
 # Load the Excel file
 file_path = 'modified_firewall_updated.xlsx'
-df = pd.read_excel(file_path)
+try:
+    df = pd.read_excel(file_path)
+except FileNotFoundError:
+    print(f"Error: The file {file_path} was not found.")
+    exit()
+except Exception as e:
+    print(f"An error occurred while loading the Excel file: {e}")
+    exit()
 
 # Prepare a list to hold the results
 results = []
@@ -16,11 +23,11 @@ for index, row in df.iterrows():
     service = str(row['Service']).strip().lower()
 
     # Check conditions for the rule
-    if source == 'any' and destination != 'any':  # Destination must not be 'any'
+    if (source == 'any' or '[zone] any' in source) and destination != 'any':  # Destination must not be 'any'
         results.append({
             "Row Number": index + 2,
             "Rule Name": row.get('Rule', 'N/A'),
-            "Source": row['Source'],
+            "Source": 'Any',  # Report as 'Any' if it matches the condition
             "Destination": row['Destination'],
             "Service": row['Service'],
         })
