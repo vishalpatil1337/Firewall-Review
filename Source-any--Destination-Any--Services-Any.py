@@ -15,30 +15,29 @@ except Exception as e:
     print(f"Error loading the Excel file: {e}")
     exit(1)
 
-# Normalize values to lowercase and treat 'any' and empty values as 'any'
-def normalize_value(value):
+# Function to check if a value is considered 'any'
+def is_any(value):
     if isinstance(value, str):
         # Strip out anything inside square brackets and then check for 'any'
-        value = re.sub(r'\[.*?\]', '', value).strip().lower()
+        stripped_value = re.sub(r'$$.*?$$', '', value).strip().lower()
         # If the value contains 'any' or is empty, treat it as 'any'
-        if 'any' in value or value == '':
-            return 'any'
-    return value
+        return 'any' in stripped_value or stripped_value == ''
+    return False
 
 # Prepare a list to hold the results
 results = []
 
 # Check each rule in the DataFrame
 for index, row in df.iterrows():
-    source = normalize_value(row.get('Source', ''))
-    destination = normalize_value(row.get('Destination', ''))
-    service = normalize_value(row.get('Service', ''))
+    source = row.get('Source', '')
+    destination = row.get('Destination', '')
+    service = row.get('Service', '')
 
     # Check if all are 'any'
-    if source == 'any' and destination == 'any' and service == 'any':
+    if is_any(source) and is_any(destination) and is_any(service):
         results.append({
             "Row Number": index + 2,  # Adjust for 1-based index and header row
-            "Rule Name": row.get('Rule', 'N/A'),
+            "Rule Name": row.get('Rule', 'N/A'),  # Assuming there's a 'Rule' column
             "Source": source,
             "Destination": destination,
             "Service": service,
@@ -50,7 +49,7 @@ results_df = pd.DataFrame(results)
 # Print results to the console with formatting
 if not results_df.empty:
     print("\nMatching Rules (Source: any, Destination: any, Service: any):")
-    print(tabulate(results_df, headers='keys', tablefmt='pretty', showindex=False))
+    print(tabulate(results_df, headers='keys', tablefmt='fancy_grid', showindex=False))
 else:
     print("No matching rules found.")
 
