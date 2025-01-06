@@ -1,5 +1,5 @@
 import pandas as pd
-from prettytable import PrettyTable  # Install with `pip install prettytable`
+from prettytable import PrettyTable
 
 # Load the Excel file
 file_path = 'modified_firewall_updated.xlsx'
@@ -27,7 +27,7 @@ for index, row in df.iterrows():
         results.append({
             "Row Number": index + 2,
             "Rule Name": row.get('Rule', 'N/A'),
-            "Source": 'Any',  # Report as 'Any' if it matches the condition
+            "Source": row['Source'],  # Report original Source value
             "Destination": row['Destination'],
             "Service": row['Service'],
         })
