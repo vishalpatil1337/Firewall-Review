@@ -1,9 +1,10 @@
 import pandas as pd
 import os
+import re
 
 # Define the paths to the Excel files
 script_dir = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the script
-rules_path = os.path.join(script_dir, 'Address Objects', 'rules.xlsx')  # Path to the rules.xlsx file in the Address Objects directory
+rules_path = os.path.join(script_dir, 'Address Objects', 'rules.xlsx')  # Path to the rules.xlsx file
 modified_firewall_path = os.path.join(script_dir, 'modified_firewall.xlsx')  # Path to the modified_firewall.xlsx file
 
 # Read the rules.xlsx file (Name and Address columns)
@@ -23,11 +24,15 @@ else:
     # Create a dictionary for replacements from rules.xlsx
     replacement_dict = dict(zip(rules_df['Name'], rules_df['Address']))
 
+    # Function to escape regex special characters in keys
+    def escape_keys(replacements):
+        return {re.escape(k): v for k, v in replacements.items()}
+
     # Function to replace words in the modified firewall DataFrame
     def replace_words_in_firewall(df, replacements):
+        escaped_replacements = escape_keys(replacements)
         for col in df.columns:
-            # Apply the replacement only if the item exists in the replacement dictionary
-            df[col] = df[col].replace(replacements, regex=True)
+            df[col] = df[col].replace(escaped_replacements, regex=True)
         return df
 
     # Replace words in the modified_firewall DataFrame using the replacement dictionary
