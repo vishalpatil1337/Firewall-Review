@@ -13,9 +13,10 @@ def clean_string(s):
 # Function to extract the group name from the row
 def extract_group_name(s):
     if isinstance(s, str):
-        # Split the string and return the last part after the space
-        parts = s.split()
-        return parts[-1] if len(parts) > 1 else s
+        # Remove "Table" followed by numbers and "address group"
+        s = re.sub(r'Table \d+ ', '', s)  # Remove "Table" and numbers
+        s = re.sub(r'address group$', '', s).strip()  # Remove "address group" at the end
+        return s
     return s
 
 # Get the current script's directory
