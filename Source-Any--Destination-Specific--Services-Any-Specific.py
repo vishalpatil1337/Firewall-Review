@@ -1,5 +1,6 @@
 import pandas as pd
 from prettytable import PrettyTable
+import re
 
 # Load the Excel file
 file_path = 'modified_firewall_updated.xlsx'
@@ -12,23 +13,59 @@ except Exception as e:
     print(f"An error occurred while loading the Excel file: {e}")
     exit()
 
+def normalize_value(value):
+    """Normalize the value by converting to lowercase and removing extra whitespace"""
+    return str(value).lower().strip()
+
+def is_any_value(item):
+    """
+    Check if a single item represents 'any'
+    Uses regex to match any text in brackets followed by 'any'
+    """
+    item = normalize_value(item)
+    
+    # Define patterns to match
+    patterns = [
+        '^any$',  # Exactly "any"
+        r'^\[.*?\]\s*any$'  # Anything in brackets followed by "any"
+    ]
+    
+    return any(re.match(pattern, item) for pattern in patterns)
+
 def is_all_any(value):
+    """
+    Check if all values in the field represent 'any'
+    Returns True if the field is empty, contains only 'any' values, or variations of 'any'
+    """
     # Handle empty/NaN values
     if pd.isna(value) or str(value).strip() == '':
         return True
-        
-    # Split the value into lines (handling both newline characters and semicolons)
-    lines = str(value).replace(';', '\n').split('\n')
     
-    # Clean and check each line
-    for line in lines:
-        line = line.strip()
-        if line and not (line.lower() == 'any' or (line.lower().startswith('[') and line.lower().endswith(' any'))):
-            return False
-    return True
+    # Convert the value to string and normalize newlines and semicolons
+    value_str = str(value).replace(';', '\n')
+    
+    # Split into lines and filter out empty lines
+    lines = [line.strip() for line in value_str.split('\n') if line.strip()]
+    
+    # If all lines are empty, consider it as "any"
+    if not lines:
+        return True
+    
+    # Check if ALL lines are "any" values
+    return all(is_any_value(line) for line in lines)
 
-def is_specific(value):
-    return not is_all_any(value)
+def has_specific_value(value):
+    """
+    Check if there's at least one specific (non-any) value in the field
+    """
+    if pd.isna(value) or str(value).strip() == '':
+        return False
+    
+    value_str = str(value).replace(';', '\n')
+    lines = [line.strip() for line in value_str.split('\n') if line.strip()]
+    
+    # Check if ANY line is not an "any" value
+    return any(not is_any_value(line) for line in lines)
 
 # Prepare a list to hold the results
 results = []
@@ -39,8 +76,11 @@ for index, row in df.iterrows():
     destination = str(row['Destination'])
     service = str(row['Service'])
     
-    # Check conditions: Source must be 'any', Destination must be specific
-    if is_all_any(source) and is_specific(destination):
+    # Check conditions:
+    # 1. Source must be 'any'
+    # 2. Destination must have at least one specific (non-any) value
+    # 3. Service can be either any or specific (no need to check)
+    if is_all_any(source) and has_specific_value(destination):
         results.append({
             "Row Number": index + 2,
             "Rule Name": row.get('Rule', 'N/A'),
@@ -54,6 +94,7 @@ if results:
     table = PrettyTable()
     table.field_names = ["Row Number", "Rule Name", "Source", "Destination", "Service"]
     table.max_width = 50  # Limit column width for better readability
+    
     for result in results:
         table.add_row([
             result["Row Number"],
@@ -62,6 +103,7 @@ if results:
             result["Destination"][:50] + ('...' if len(result["Destination"]) > 50 else ''),
             result["Service"][:50] + ('...' if len(result["Service"]) > 50 else '')
         ])
+    
     print("\nMatching Rules (Source: Any, Destination: Specific, Service: Any/Specific):\n")
     print(table)
 else:
