@@ -1,46 +1,75 @@
 import pandas as pd
-from tabulate import tabulate
+from prettytable import PrettyTable
+import re
 
-# Load the Excel file
-file_path = 'modified_firewall_updated.xlsx'
-df = pd.read_excel(file_path)
+def normalize_value(value):
+    return str(value).lower().strip()
 
-# Print the column names to understand the structure (optional)
-print("Column names in the DataFrame:")
-print(df.columns)
+def is_any_value(item):
+    item = normalize_value(item)
+    patterns = [
+        '^any$',  # Matches standalone "any"
+        r'^\[[\w\s-]+\]\s*any$'  # Matches [anything] any
+    ]
+    return any(re.match(pattern, item, re.IGNORECASE) for pattern in patterns)
 
-# Prepare a list to hold the results
+def is_all_any(value):
+    if pd.isna(value) or str(value).strip() == '':
+        return True
+    value_str = str(value).replace(';', '\n')
+    lines = [line.strip() for line in value_str.split('\n') if line.strip()]
+    return not lines or all(is_any_value(line) for line in lines)
+
+def has_specific_value(value):
+    if pd.isna(value) or str(value).strip() == '':
+        return False
+    value_str = str(value).replace(';', '\n')
+    lines = [line.strip() for line in value_str.split('\n') if line.strip()]
+    return any(not is_any_value(line) for line in lines)
+
+try:
+    df = pd.read_excel('modified_firewall_updated.xlsx')
+except FileNotFoundError:
+    print("Error: File not found.")
+    exit()
+except Exception as e:
+    print(f"Error loading file: {e}")
+    exit()
+
 results = []
-
-# Check each rule in the DataFrame
 for index, row in df.iterrows():
-    # Normalize values to lowercase for case-insensitive comparison
-    source = str(row['Source']).strip().lower()  # Get the source from the DataFrame
-    destination = str(row['Destination']).strip().lower()  # Get the destination from the DataFrame
-    service = str(row['Service']).strip().lower()  # Get the service from the DataFrame
-
-    # Check if source is specific, destination is any, and service is any/specific
-    if source != 'any' and destination == 'any':
-        # Add 2 to index to account for the header row and 1-based index
+    source = str(row['Source'])
+    destination = str(row['Destination'])
+    service = str(row['Service'])
+    
+    if has_specific_value(source) and is_all_any(destination):
         results.append({
-            "Row Number": index + 2,  # Adjust for 1-based index and header row
-            "Rule Name": row.get('Rule', 'N/A'),  # Adjust if there's a Rule Name column
+            "Row Number": index + 2,
+            "Rule Name": row.get('Rule', 'N/A'),
             "Source": source,
             "Destination": destination,
             "Service": service,
         })
 
-# Create a DataFrame for the results
-results_df = pd.DataFrame(results)
-
-# Print results to the console with formatting
-if not results_df.empty:
-    print("\nMatching Rules (Source: Specific, Destination: any, Service: any/specific):")
-    print(tabulate(results_df, headers='keys', tablefmt='pretty', showindex=False))
+if results:
+    table = PrettyTable()
+    table.field_names = ["Row Number", "Rule Name", "Source", "Destination", "Service"]
+    table.max_width = 50
+    
+    for result in results:
+        table.add_row([
+            result["Row Number"],
+            result["Rule Name"],
+            result["Source"][:50] + ('...' if len(result["Source"]) > 50 else ''),
+            result["Destination"][:50] + ('...' if len(result["Destination"]) > 50 else ''),
+            result["Service"][:50] + ('...' if len(result["Service"]) > 50 else '')
+        ])
+    
+    print("\nMatching Rules (Source: Specific, Destination: Any, Service: Any/Specific):\n")
+    print(table)
 else:
     print("No matching rules found.")
 
-# Save results to a new Excel file
-output_file_path = 'Source-Specific--Destination-Any--Services-Any-Specific.xlsx'
-results_df.to_excel(output_file_path, index=False)
-print(f"\nResults saved to {output_file_path}")
+output_file = 'Source-Specific--Destination-Any--Services-Any-Specific.xlsx'
+pd.DataFrame(results).to_excel(output_file, index=False)
+print(f"\nResults saved to {output_file}")
