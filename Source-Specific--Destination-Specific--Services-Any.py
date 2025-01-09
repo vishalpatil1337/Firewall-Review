@@ -1,50 +1,75 @@
 import pandas as pd
-from tabulate import tabulate  # Ensure you install this library using `pip install tabulate`
-import os
+from prettytable import PrettyTable
+import re
 
-# Adjust terminal width (Optional for better display)
-os.system('mode con: cols=150')  # Sets CMD window to 150 columns wide
+def normalize_value(value):
+    return str(value).lower().strip()
 
-# Load the Excel file
-file_path = 'modified_firewall_updated.xlsx'
-df = pd.read_excel(file_path)
+def is_any_value(item):
+    item = normalize_value(item)
+    patterns = [
+        '^any$',
+        r'^\[[\w\s-]+\]\s*any$'
+    ]
+    return any(re.match(pattern, item, re.IGNORECASE) for pattern in patterns)
 
-# Print the column names to understand the structure (optional)
-print("Column names in the DataFrame:")
-print(df.columns)
+def is_all_any(value):
+    if pd.isna(value) or str(value).strip() == '':
+        return True
+    value_str = str(value).replace(';', '\n')
+    lines = [line.strip() for line in value_str.split('\n') if line.strip()]
+    return not lines or all(is_any_value(line) for line in lines)
 
-# Prepare a list to hold the results
+def has_specific_value(value):
+    if pd.isna(value) or str(value).strip() == '':
+        return False
+    value_str = str(value).replace(';', '\n')
+    lines = [line.strip() for line in value_str.split('\n') if line.strip()]
+    return any(not is_any_value(line) for line in lines)
+
+try:
+    df = pd.read_excel('modified_firewall_updated.xlsx')
+except FileNotFoundError:
+    print("Error: File not found.")
+    exit()
+except Exception as e:
+    print(f"Error loading file: {e}")
+    exit()
+
 results = []
-
-# Check each rule in the DataFrame
 for index, row in df.iterrows():
-    # Normalize values to lowercase for case-insensitive comparison
-    source = str(row['Source']).strip().lower()
-    destination = str(row['Destination']).strip().lower()
-    service = str(row['Service']).strip().lower()
-
-    # Check if source and destination are specific (not 'any') and service is 'any'
-    if source != 'any' and destination != 'any' and service == 'any':
-        # Add 2 to index to account for the header row and 1-based index
+    source = str(row['Source'])
+    destination = str(row['Destination'])
+    service = str(row['Service'])
+    
+    if has_specific_value(source) and has_specific_value(destination) and is_all_any(service):
         results.append({
             "Row Number": index + 2,
             "Rule Name": row.get('Rule', 'N/A'),
-            "Source": row['Source'],
-            "Destination": row['Destination'],
-            "Service": row['Service'],
+            "Source": source,
+            "Destination": destination,
+            "Service": service,
         })
 
-# Create a DataFrame for the results
-results_df = pd.DataFrame(results)
-
-# Print results to the console with formatting
-if not results_df.empty:
-    print("\nMatching Rules (Source: Specific, Destination: Specific, Service: any):\n")
-    print(tabulate(results_df, headers='keys', tablefmt='grid', showindex=False))
+if results:
+    table = PrettyTable()
+    table.field_names = ["Row Number", "Rule Name", "Source", "Destination", "Service"]
+    table.max_width = 50
+    
+    for result in results:
+        table.add_row([
+            result["Row Number"],
+            result["Rule Name"],
+            result["Source"][:50] + ('...' if len(result["Source"]) > 50 else ''),
+            result["Destination"][:50] + ('...' if len(result["Destination"]) > 50 else ''),
+            result["Service"][:50] + ('...' if len(result["Service"]) > 50 else '')
+        ])
+    
+    print("\nMatching Rules (Source: Specific, Destination: Specific, Service: Any):\n")
+    print(table)
 else:
     print("No matching rules found.")
 
-# Save results to a new Excel file
-output_file_path = 'Source-Specific--Destination-Specific--Services-Any.xlsx'
-results_df.to_excel(output_file_path, index=False)
-print(f"\nResults saved to {output_file_path}")
+output_file = 'Source-Specific--Destination-Specific--Services-Any.xlsx'
+pd.DataFrame(results).to_excel(output_file, index=False)
+print(f"\nResults saved to {output_file}")
