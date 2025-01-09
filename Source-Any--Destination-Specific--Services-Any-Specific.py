@@ -12,32 +12,56 @@ except Exception as e:
     print(f"An error occurred while loading the Excel file: {e}")
     exit()
 
+def is_all_any(value):
+    # Handle empty/NaN values
+    if pd.isna(value) or str(value).strip() == '':
+        return True
+        
+    # Split the value into lines (handling both newline characters and semicolons)
+    lines = str(value).replace(';', '\n').split('\n')
+    
+    # Clean and check each line
+    for line in lines:
+        line = line.strip()
+        if line and not (line.lower() == 'any' or (line.lower().startswith('[') and line.lower().endswith(' any'))):
+            return False
+    return True
+
+def is_specific(value):
+    return not is_all_any(value)
+
 # Prepare a list to hold the results
 results = []
 
 # Check each rule in the DataFrame
 for index, row in df.iterrows():
-    # Normalize values to lowercase for case-insensitive comparison
-    source = str(row['Source']).strip().lower()
-    destination = str(row['Destination']).strip().lower()
-    service = str(row['Service']).strip().lower()
-
-    # Check conditions for the rule
-    if (source == 'any' or '[zone] any' in source) and destination != 'any':  # Destination must not be 'any'
+    source = str(row['Source'])
+    destination = str(row['Destination'])
+    service = str(row['Service'])
+    
+    # Check conditions: Source must be 'any', Destination must be specific
+    if is_all_any(source) and is_specific(destination):
         results.append({
             "Row Number": index + 2,
             "Rule Name": row.get('Rule', 'N/A'),
-            "Source": row['Source'],  # Report original Source value
-            "Destination": row['Destination'],
-            "Service": row['Service'],
+            "Source": source,
+            "Destination": destination,
+            "Service": service,
         })
 
 # Print results to the console with formatting
 if results:
     table = PrettyTable()
     table.field_names = ["Row Number", "Rule Name", "Source", "Destination", "Service"]
+    table.max_width = 50  # Limit column width for better readability
     for result in results:
-        table.add_row([result["Row Number"], result["Rule Name"], result["Source"], result["Destination"], result["Service"]])
+        table.add_row([
+            result["Row Number"],
+            result["Rule Name"],
+            result["Source"][:50] + ('...' if len(result["Source"]) > 50 else ''),
+            result["Destination"][:50] + ('...' if len(result["Destination"]) > 50 else ''),
+            result["Service"][:50] + ('...' if len(result["Service"]) > 50 else '')
+        ])
     print("\nMatching Rules (Source: Any, Destination: Specific, Service: Any/Specific):\n")
     print(table)
 else:
