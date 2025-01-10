@@ -1,164 +1,115 @@
 import pandas as pd
-import ipaddress
-import re
-from typing import List, Dict, Optional, Tuple
-from datetime import datetime
-import logging
+import os
+import numpy as np
+import re  # Added missing import
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(f'firewall_analysis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
-        logging.StreamHandler()
-    ]
-)
-
-class FirewallAnalyzer:
-    def __init__(self):
-        # Define private networks
-        self.private_networks = [
-            ipaddress.ip_network('10.0.0.0/8'),
-            ipaddress.ip_network('172.16.0.0/12'),
-            ipaddress.ip_network('192.168.0.0/16')
-        ]
-        # Updated pattern to better handle Group tags
-        self.ip_pattern = re.compile(r'\[Host\]\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
-
-    def is_private(self, ip: str) -> bool:
-        """Check if an IP address is private."""
-        try:
-            ip_obj = ipaddress.ip_address(ip)
-            return any(ip_obj in network for network in self.private_networks)
-        except ValueError:
-            logging.warning(f"Invalid IP address: {ip}")
-            return False
-
-    def get_subnet_info(self, ip: str) -> str:
-        """Get subnet information for an IP address."""
-        try:
-            ip_obj = ipaddress.ip_address(ip)
-            ip_parts = str(ip_obj).split('.')
-            
-            if ip_parts[0] == '10':
-                return f'10.0.0.0/8 Network (First Octet: {ip_parts[0]})'
-            elif ip_parts[0] == '172' and 16 <= int(ip_parts[1]) <= 31:
-                return f'172.16.0.0/12 Network (First Two Octets: {ip_parts[0]}.{ip_parts[1]})'
-            elif ip_parts[0] == '192' and ip_parts[1] == '168':
-                return f'192.168.0.0/16 Network (First Three Octets: {ip_parts[0]}.{ip_parts[1]}.{ip_parts[2]})'
-            return 'Public Internet'
-        except ValueError:
-            return 'Invalid IP'
-
-    def extract_ips(self, text: str) -> List[str]:
-        """Extract IP addresses from text."""
-        if not isinstance(text, str):
-            return []
-        return self.ip_pattern.findall(text)
-
-    def analyze_rule(self, source: str, destination: str, services: str) -> List[Dict]:
-        """Analyze a single rule and return all matching patterns."""
-        findings = []
-        source_ips = self.extract_ips(source)
-        dest_ips = self.extract_ips(destination)
-
-        if not source_ips or not dest_ips:
-            return findings
-
-        for src_ip in source_ips:
-            src_is_private = self.is_private(src_ip)
-            src_subnet = self.get_subnet_info(src_ip)
-
-            for dst_ip in dest_ips:
-                dst_is_private = self.is_private(dst_ip)
-                dst_subnet = self.get_subnet_info(dst_ip)
-
-                # Check for private to public pattern
-                if src_is_private and not dst_is_private:
-                    findings.append({
-                        'pattern': 'Private to Public',
-                        'source_ip': src_ip,
-                        'source_subnet': src_subnet,
-                        'destination_ip': dst_ip,
-                        'destination_subnet': dst_subnet,
-                        'services': services
-                    })
-                # Check for public to private pattern
-                elif not src_is_private and dst_is_private:
-                    findings.append({
-                        'pattern': 'Public to Private',
-                        'source_ip': src_ip,
-                        'source_subnet': src_subnet,
-                        'destination_ip': dst_ip,
-                        'destination_subnet': dst_subnet,
-                        'services': services
-                    })
-
-        return findings
-
-def analyze_firewall_rules(filename: str) -> None:
-    """Main function to analyze firewall rules."""
+def load_excel_files(rules_path, firewall_path):
+    """Load Excel files and perform basic validation."""
     try:
-        # Load Excel file
-        df = pd.read_excel(filename, usecols="C,D,E", names=['Source', 'Destination', 'Services'])
-        logging.info(f"Loaded {len(df)} rules from {filename}")
-
-        analyzer = FirewallAnalyzer()
-        all_findings = []
-
-        # Analyze each rule
-        for index, row in df.iterrows():
-            try:
-                findings = analyzer.analyze_rule(
-                    str(row['Source']), 
-                    str(row['Destination']), 
-                    str(row['Services'])
-                )
-                
-                for finding in findings:
-                    all_findings.append({
-                        'Row': index + 2,
-                        'Pattern': finding['pattern'],
-                        'Source IP': finding['source_ip'],
-                        'Source Network': finding['source_subnet'],
-                        'Destination IP': finding['destination_ip'],
-                        'Destination Network': finding['destination_subnet'],
-                        'Services': finding['services'],
-                        'Original Source': row['Source'],
-                        'Original Destination': row['Destination']
-                    })
-                    
-                    logging.info(
-                        f"Row {index + 2}: Found {finding['pattern']} pattern\n"
-                        f"Source: {finding['source_ip']} ({finding['source_subnet']})\n"
-                        f"Destination: {finding['destination_ip']} ({finding['destination_subnet']})"
-                    )
-                    
-            except Exception as e:
-                logging.error(f"Error analyzing row {index + 2}: {e}")
-                continue
-
-        # Save results
-        if all_findings:
-            output_file = f'firewall_analysis_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
-            pd.DataFrame(all_findings).to_excel(output_file, index=False)
-            logging.info(f"Saved {len(all_findings)} findings to {output_file}")
-
-            # Print summary
-            print("\nAnalysis Summary:")
-            print(f"Total rules analyzed: {len(df)}")
-            print(f"Rules with findings: {len(all_findings)}")
-            print("\nDetailed Findings:")
-            for finding in all_findings:
-                print(f"\nRow {finding['Row']}:")
-                print(f"Pattern: {finding['Pattern']}")
-                print(f"Source: {finding['Source IP']} ({finding['Source Network']})")
-                print(f"Destination: {finding['Destination IP']} ({finding['Destination Network']})")
-                print(f"Services: {finding['Services']}")
-
+        rules_df = pd.read_excel(rules_path)
+        firewall_df = pd.read_excel(firewall_path)
+        
+        # Validate required columns
+        if 'Name' not in rules_df.columns or 'Address' not in rules_df.columns:
+            raise ValueError("Rules file must contain 'Name' and 'Address' columns")
+            
+        return rules_df, firewall_df
+    
     except Exception as e:
-        logging.error(f"Analysis failed: {e}")
-        raise
+        print(f"Error loading files: {str(e)}")
+        return None, None
+
+def create_replacement_dict(rules_df):
+    """Create a clean replacement dictionary from rules DataFrame."""
+    # Drop any rows where Name or Address is null
+    rules_df = rules_df.dropna(subset=['Name', 'Address'])
+    
+    # Convert both columns to string and strip whitespace
+    rules_df['Name'] = rules_df['Name'].astype(str).str.strip()
+    rules_df['Address'] = rules_df['Address'].astype(str).str.strip()
+    
+    # Create dictionary with exact word boundaries
+    replacement_dict = dict(zip(rules_df['Name'], rules_df['Address']))
+    
+    # Validate the dictionary isn't empty
+    if not replacement_dict:
+        raise ValueError("No valid replacement rules found in rules file")
+        
+    return replacement_dict
+
+def replace_words_in_cell(cell, replacement_dict):
+    """Replace words in a single cell with exact matching."""
+    if pd.isna(cell) or not isinstance(cell, str):
+        return cell
+    
+    # Convert cell to string if it isn't already
+    cell_str = str(cell)
+    
+    # Perform replacements
+    for old_word, new_word in replacement_dict.items():
+        # Create a regex pattern with word boundaries
+        pattern = r'\b' + re.escape(old_word) + r'\b'
+        cell_str = re.sub(pattern, new_word, cell_str)
+    
+    return cell_str
+
+def process_firewall_data(firewall_df, replacement_dict):
+    """Process the firewall DataFrame with replacements."""
+    # Create a copy to avoid modifying the original
+    result_df = firewall_df.copy()
+    
+    # Only process string/object columns
+    string_columns = result_df.select_dtypes(include=['object']).columns
+    
+    if not len(string_columns):
+        raise ValueError("No string columns found in firewall data to process")
+    
+    # Apply replacements to each string column
+    for col in string_columns:
+        result_df[col] = result_df[col].apply(lambda x: replace_words_in_cell(x, replacement_dict))
+    
+    return result_df
+
+def main():
+    # Get the directory of the script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Define file paths
+    rules_path = os.path.join(script_dir, 'Address Objects', 'rules.xlsx')
+    firewall_path = os.path.join(script_dir, 'modified_firewall.xlsx')
+    output_path = os.path.join(script_dir, 'modified_firewall_updated.xlsx')
+    
+    # Verify files exist
+    if not os.path.exists(rules_path):
+        print(f"Error: Rules file not found at {rules_path}")
+        return
+    if not os.path.exists(firewall_path):
+        print(f"Error: Firewall file not found at {firewall_path}")
+        return
+    
+    # Load the files
+    rules_df, firewall_df = load_excel_files(rules_path, firewall_path)
+    if rules_df is None or firewall_df is None:
+        return
+    
+    try:
+        # Create replacement dictionary
+        replacement_dict = create_replacement_dict(rules_df)
+        
+        # Print some information about what we're going to do
+        print(f"Found {len(replacement_dict)} replacement rules")
+        print(f"Processing {len(firewall_df)} rows in firewall data")
+        
+        # Process the firewall data
+        updated_firewall_df = process_firewall_data(firewall_df, replacement_dict)
+        
+        # Save the results
+        updated_firewall_df.to_excel(output_path, index=False)
+        print(f"Successfully processed and saved to: {output_path}")
+        
+    except Exception as e:
+        print(f"Error during processing: {str(e)}")
+        raise  # Re-raise the exception for debugging purposes
 
 if __name__ == "__main__":
-    analyze_firewall_rules("modified_firewall_updated.xlsx")
+    main()
