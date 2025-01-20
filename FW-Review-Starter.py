@@ -106,6 +106,7 @@ def main():
     # 22. Execute CDE-OOS-Checker
     if echo_message("Step 22: Executing CDE-OOS-Checker..."):
         execute_script("CDE-OOS-Checker.py")
+         execute_script("cde-to-external.py")
 
     # 23. Finding message
     echo_message("Step 23: Findings.xlsx file will be generated, check to find results...")
