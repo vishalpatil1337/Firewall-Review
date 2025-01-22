@@ -72,6 +72,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   ![image](https://github.com/user-attachments/assets/08a54b8a-8e20-4136-b02a-a31fc28a8fca)
 
   -  step_3: "After choosing Table to CSV option so many options will come like below given screenshot, Choose only All Network Filtering Tables"
+ 
 ![image](https://github.com/user-attachments/assets/ed616deb-d207-4be9-a47a-23e853424a97)
 
   -  step_4: "Execute the script:"
