@@ -75,7 +75,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
  
 ![image](https://github.com/user-attachments/assets/ed616deb-d207-4be9-a47a-23e853424a97)
 
-  -  step_4: "Execute the script:"
+  -  step_4: "Install all PreRequirements and Execute the script:"
       ```command: "python FW-Review-Starter.py"```
   
 
