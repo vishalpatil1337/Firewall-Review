@@ -65,10 +65,16 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
 ## Usage:
   To run script:
-   - step_1: "Open the command line or terminal."
-   - step_2: "Navigate to the project directory:"
-      command: "cd firewall-review"
-  -  step_3: "Execute the script:"
+   - step_1: "Select the firewall configuration file and generate a report using the Nipper tool"
+  ![image](https://github.com/user-attachments/assets/307fd3f8-8b16-4e2e-bd00-b88819713d21)
+
+   - step_2: "Save Firewall generated report in HTML and Table to CSV Format"
+  ![image](https://github.com/user-attachments/assets/08a54b8a-8e20-4136-b02a-a31fc28a8fca)
+
+  -  step_3: "After choosing Table to CSV option so many options will come like below given screenshot, Choose only All Network Filtering Tables"
+![image](https://github.com/user-attachments/assets/ed616deb-d207-4be9-a47a-23e853424a97)
+
+  -  step_4: "Execute the script:"
       ```command: "python FW-Review-Starter.py"```
   
 
