@@ -60,7 +60,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   pip install pandas
   pip install openpyxl
   pip install xlsxwriter
-  pip install preetytable
+  pip install prettytable
   pip install colorama
 
 ## Usage:
