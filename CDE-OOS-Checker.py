@@ -140,8 +140,8 @@ def display_and_save_results(rules_df, findings):
         findings_df = findings_df[column_order]
         
         print(tabulate(findings_df, headers='keys', tablefmt='fancy_grid', showindex=False))
-        findings_df.to_excel("findings.xlsx", index=False)
-        print("Findings saved to 'findings.xlsx'.")
+        findings_df.to_excel("output_cde-oos-findings.xlsx", index=False)
+        print("Findings saved to 'output_cde-oos-findings.xlsx'.")
     else:
         print("  No findings reported.")
 
