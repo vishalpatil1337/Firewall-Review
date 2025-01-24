@@ -2,8 +2,8 @@ import pandas as pd
 import os
 
 # File name
-file_findings = "findings.xlsx"
-output_file_findings = "findings.xlsx"  # Save back to the same file
+file_findings = "output_cde-oos-findings.xlsx"
+output_file_findings = "output_cde-oos-findings.xlsx"  # Save back to the same file
 
 # Function to process the findings.xlsx file
 def process_findings():
