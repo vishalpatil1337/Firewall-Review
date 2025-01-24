@@ -2,9 +2,9 @@ import pandas as pd
 import os
 
 # Check if the file exists
-file_path = 'firewall_analysis_results.xlsx'
+file_path = 'output_external_internal.xlsx'
 if not os.path.exists(file_path):
-    print("File 'firewall_analysis_results.xlsx' not found.")
+    print("File 'output_external_internal.xlsx' not found.")
 else:
     # Load the Excel file into a pandas DataFrame
     df = pd.read_excel(file_path, sheet_name=None)
