@@ -1,6 +1,3 @@
-> Tricky Mind:
-Improved oos script 
-
 Option Explicit
 
 ' Improved Excel IP Highlighter Script for Multiple Columns
