@@ -114,11 +114,22 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   ---
 
   
-  ## Script_Flow: 
-    - The script will guide you through various steps.
-    - For each step, you’ll be asked to confirm if you wish to proceed by typing 'y' or 'n'.
-    - Logs and outputs will be generated, such as `Findings.xlsx`, `firewall_analysis_results.xlsx`, based on your input files and configurations.
+## Script Flow:
 
+1. **Step-by-Step Guidance**  
+   The script will guide you through various steps, asking for your confirmation to proceed by typing **'y'** (yes) or **'n'** (no) at each stage.
+
+2. **Processing Input Files and Configurations**  
+   You will provide input files and configurations that will be processed by the script.
+
+3. **Output Files Generated**  
+   Based on your inputs, the script will generate the following `.xlsx` output files:
+   - `output_cde-oos-findings.xlsx`
+   - `output_Source-Any--Destination-Any--Services-Any.xlsx`
+   - `output_Source-Any--Destination-Specific--Services-Any-Specific.xlsx`
+   - `output_Source-Specific--Destination-Any--Services-Any-Specific.xlsx`
+   - `output_Source-Specific--Destination-Specific--Services-Any.xlsx`
+   - `output_external_internal.xlsx`
 
 ---
 
