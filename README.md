@@ -7,66 +7,98 @@ The **Firewall Rule Checker** is an automated Python-based script designed to ex
 
 rules_check:
 ```
-- 1. Source-Specific to Destination-Any
+- 1. Source-Any to Destination-Any (Services-Any)
 
-Validate specific source IPs/subnets against any destination
-Ensure comprehensive source IP validation
-Cover specific or any service configurations
+Identifies unrestricted communication between any source and any destination.
 
-- 2. Source-Specific to Destination-Specific
+Flags potential security risks due to lack of restrictions.
 
-Verify communication between specific source and destination IPs
-Validate granular service-level access control
-Independent service rule checking
+Ensures proper segmentation and access control.
 
-- 3. Source-Any to Destination-Specific
+- 2. Source-Specific to Destination-Any (Services-Any/Specific)
 
-Analyze rules with unrestricted source access
-Identify potential security vulnerabilities
-Assess destination-specific services
+Validates specific source IPs/subnets communicating with any destination.
 
-- 4. Out of Scope Source to CDE Destination
+Ensures comprehensive source IP validation.
 
-Flag unauthorized Cardholder Data Environment (CDE) access
-Prevent potential data breaches
-Restrict cross-zone access
+Covers both general and specific service configurations.
 
-- 5. CDE Destination to Out of Scope Source
+- 3. Source-Specific to Destination-Specific (Services-Any)
 
-Identify risky CDE access patterns
-Enforce strict data protection
-Analyze inbound/outbound CDE traffic
+Verifies communication between specific source and destination IPs.
 
-- 6. CDE to External Network
+Ensures granular service-level access control.
 
-Monitor CDE communication with external networks
-Validate external access to sensitive environments
-Ensure strict data protection protocols
+Checks independent service rule configurations.
 
-- 7. External to CDE Network
+- 4. Source-Any to Destination-Specific (Services-Any/Specific)
 
-Analyze external network attempts to access CDE
-Implement rigorous access control mechanisms
-Prevent unauthorized data exposure
+Analyzes rules where source access is unrestricted.
 
-- 8. External to Internal Network
+Identifies potential security vulnerabilities.
 
-Validate public-to-private network communication
-Ensure robust network segmentation
-Assess perimeter security
+Assesses destination-specific service access.
 
-- 9. Internal to External Network
+- 5. Out of Scope Source to CDE Destination
 
-Examine private-to-public rules
-Mitigate data leakage risks
-Control outbound traffic
+Flags unauthorized access to the Cardholder Data Environment (CDE).
+
+Prevents unauthorized data exposure and potential breaches.
+
+Restricts access across network zones.
+
+- 6. CDE Destination to Out of Scope Source
+
+Identifies risky outbound access from CDE to out-of-scope sources.
+
+Enforces strict data protection policies.
+
+Analyzes inbound/outbound CDE traffic for security gaps.
+
+- 7. CDE Source to External Destination and Vice Versa
+
+Monitors communication between the CDE and external networks.
+
+Ensures compliance with strict data protection protocols.
+
+Validates both inbound and outbound access control measures.
+
+- 8. External IP or Subnet to Internal IP or Subnet
+
+Validates communication between external and internal networks.
+
+Ensures robust network segmentation.
+
+Assesses perimeter security controls.
+
+- 9. Internal IP or Subnet to External IP or Subnet
+
+Examines private network traffic directed towards public networks.
+
+Mitigates data leakage risks.
+
+Controls outbound traffic to prevent unauthorized transmissions.
 
 - 10. Overly Permissive Rules
 
-Identify unrestricted access configurations
-Recommend security enhancements
-Evaluate rule permissiveness
+Identifies rules with unrestricted access configurations.
+
+Recommends security enhancements to tighten access controls.
+
+Evaluates rule permissiveness to reduce exposure risks.
  ```
+
+## Compliance with PCI DSS
+
+The framework ensures adherence to PCI DSS firewall and router security requirements, including:
+
+Requirement 1.1.7: Documentation of all connections to the cardholder data environment.
+
+Requirement 1.2: Restrict inbound and outbound traffic to only what is necessary.
+
+Requirement 1.3: Prohibit direct public access between external networks and CDE.
+
+Requirement 1.4: Install personal firewall software on devices with direct Internet access.
 
 ---
 
