@@ -5,88 +5,60 @@
 ## Description:
 The **Firewall Rule Checker** is an automated Python-based script designed to execute multiple steps for validating and modifying firewall configurations. The script facilitates the execution of various Python modules in sequence, including tasks such as checking firewall rules, replacing address objects, and performing firewall analysis. This tool is ideal for network security professionals who need to streamline firewall rule checking and configuration modification processes. The Firewall Rule Checker automates the process of analyzing firewall configurations to ensure compliance and highlight potential security risks. Below is a description of the rules checked by the script:
 
-rules_check:
-```
-- 1. Source-Any to Destination-Any (Services-Any)
+## Rule Categories
 
-Identifies unrestricted communication between any source and any destination.
+The framework classifies firewall rules into ten distinct categories to facilitate structured validation.
 
-Flags potential security risks due to lack of restrictions.
+### 1. **Source-Any to Destination-Any (Services-Any)**
+- Identifies unrestricted communication between any source and any destination.
+- Flags potential security risks due to lack of restrictions.
+- Ensures proper segmentation and access control.
 
-Ensures proper segmentation and access control.
+### 2. **Source-Specific to Destination-Any (Services-Any/Specific)**
+- Validates specific source IPs/subnets communicating with any destination.
+- Ensures comprehensive source IP validation.
+- Covers both general and specific service configurations.
 
-- 2. Source-Specific to Destination-Any (Services-Any/Specific)
+### 3. **Source-Specific to Destination-Specific (Services-Any)**
+- Verifies communication between specific source and destination IPs.
+- Ensures granular service-level access control.
+- Checks independent service rule configurations.
 
-Validates specific source IPs/subnets communicating with any destination.
+### 4. **Source-Any to Destination-Specific (Services-Any/Specific)**
+- Analyzes rules where source access is unrestricted.
+- Identifies potential security vulnerabilities.
+- Assesses destination-specific service access.
 
-Ensures comprehensive source IP validation.
+### 5. **Out of Scope Source to CDE Destination**
+- Flags unauthorized access to the Cardholder Data Environment (CDE).
+- Prevents unauthorized data exposure and potential breaches.
+- Restricts access across network zones.
 
-Covers both general and specific service configurations.
+### 6. **CDE Destination to Out of Scope Source**
+- Identifies risky outbound access from CDE to out-of-scope sources.
+- Enforces strict data protection policies.
+- Analyzes inbound/outbound CDE traffic for security gaps.
 
-- 3. Source-Specific to Destination-Specific (Services-Any)
+### 7. **CDE Source to External Destination and Vice Versa**
+- Monitors communication between the CDE and external networks.
+- Ensures compliance with strict data protection protocols.
+- Validates both inbound and outbound access control measures.
 
-Verifies communication between specific source and destination IPs.
+### 8. **External IP or Subnet to Internal IP or Subnet**
+- Validates communication between external and internal networks.
+- Ensures robust network segmentation.
+- Assesses perimeter security controls.
 
-Ensures granular service-level access control.
+### 9. **Internal IP or Subnet to External IP or Subnet**
+- Examines private network traffic directed towards public networks.
+- Mitigates data leakage risks.
+- Controls outbound traffic to prevent unauthorized transmissions.
 
-Checks independent service rule configurations.
+### 10. **Overly Permissive Rules**
+- Identifies rules with unrestricted access configurations.
+- Recommends security enhancements to tighten access controls.
+- Evaluates rule permissiveness to reduce exposure risks.
 
-- 4. Source-Any to Destination-Specific (Services-Any/Specific)
-
-Analyzes rules where source access is unrestricted.
-
-Identifies potential security vulnerabilities.
-
-Assesses destination-specific service access.
-
-- 5. Out of Scope Source to CDE Destination
-
-Flags unauthorized access to the Cardholder Data Environment (CDE).
-
-Prevents unauthorized data exposure and potential breaches.
-
-Restricts access across network zones.
-
-- 6. CDE Destination to Out of Scope Source
-
-Identifies risky outbound access from CDE to out-of-scope sources.
-
-Enforces strict data protection policies.
-
-Analyzes inbound/outbound CDE traffic for security gaps.
-
-- 7. CDE Source to External Destination and Vice Versa
-
-Monitors communication between the CDE and external networks.
-
-Ensures compliance with strict data protection protocols.
-
-Validates both inbound and outbound access control measures.
-
-- 8. External IP or Subnet to Internal IP or Subnet
-
-Validates communication between external and internal networks.
-
-Ensures robust network segmentation.
-
-Assesses perimeter security controls.
-
-- 9. Internal IP or Subnet to External IP or Subnet
-
-Examines private network traffic directed towards public networks.
-
-Mitigates data leakage risks.
-
-Controls outbound traffic to prevent unauthorized transmissions.
-
-- 10. Overly Permissive Rules
-
-Identifies rules with unrestricted access configurations.
-
-Recommends security enhancements to tighten access controls.
-
-Evaluates rule permissiveness to reduce exposure risks.
- ```
 
 ## Compliance with PCI DSS
 
@@ -151,16 +123,21 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 ---
 
 ## Script_Steps:
-  - name: "startup.py"          description: "Initializes firewall configuration and generates text files (cde.txt, oos.txt, etc.)"
-  - name: "format-changer.py"    description: "Converts firewall CSV files into Excel format"
-  - name: "all-in-one.maker-groups.py" description: "Combines multiple groups into a single group"
-  - name: "replace.py"           description: "Checks and replaces group names in the firewall configuration"
-  - name: "replace-ao.py"        description: "Updates address objects in the modified firewall file"
-  - name: "Source and Destination Rules Check" description: "Verifies firewall rules like Source-Any, Destination-Any, and more"
-  - name: "cde-oos-subnet-extractor.py" description: "Converts subnet ranges into IP addresses"
-  - name: "CDE-OOS-Checker"     description: "Validates CDE and OOS rules from an Excel file"
-  - name: "external-to-internal.py" description: "Checks public-to-private firewall rules and generates analysis reports"
-  - note: "Each script is executed in sequence, with confirmation prompts to ensure the user is ready for the next step."
+## Script Workflow
+
+| Script Name                     | Description |
+|----------------------------------|-------------|
+| **startup.py**                   | Initializes firewall configuration and generates required text files (cde.txt, oos.txt, etc.). |
+| **format-changer.py**            | Converts firewall CSV files into Excel format for better readability and processing. |
+| **all-in-one.maker-groups.py**    | Merges multiple firewall address groups into a single group for streamlined management. |
+| **replace.py**                   | Finds and replaces group names in the firewall configuration to ensure consistency. |
+| **replace-ao.py**                 | Updates address objects in the modified firewall configuration file. |
+| **Source and Destination Rules Check** | Verifies firewall rules, including Source-Any, Destination-Any, and other predefined categories. |
+| **cde-oos-subnet-extractor.py**   | Converts subnet ranges into individual IP addresses for validation. |
+| **CDE-OOS-Checker**               | Validates compliance of CDE and OOS rules from an Excel file. |
+| **external-to-internal.py**       | Analyzes public-to-private firewall rules and generates security reports. |
+
+Each script executes in sequence, with prompts ensuring proper execution flow.
 
 
 ---
