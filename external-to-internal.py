@@ -208,7 +208,7 @@ class FirewallRuleAnalyzer:
             logging.info("No findings to save")
             return
             
-        output_file = "output_external-to-internal.xlsx"  # Fixed output filename
+        output_file = "output_external_internal.xlsx"  # Fixed output filename
         
         try:
             findings_df = pd.DataFrame(findings)
