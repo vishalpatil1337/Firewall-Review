@@ -7,38 +7,65 @@ The **Firewall Rule Checker** is an automated Python-based script designed to ex
 
 rules_check:
 ```
-  - 1: "Source-Specific to Destination-Any with Services-Any/Specific"
-    description: >
-      Ensures that specific source IPs or subnets are properly validated 
-      against any destination with specific or any services.
-  - 2: "Source-Specific to Destination-Specific with Services-Any"
-    description: >
-      Verifies rules where specific source IPs communicate with specific 
-      destination IPs or subnets using any services.
-  - 3: "Source-Any to Destination-Specific with Services-Any/Specific"
-    description: >
-      Checks rules where any source IP communicates with specific destination 
-      IPs or subnets for specific or any services.
-  - 4: "Out of Scope Source to CDE Destination"
-    description: >
-      Analyzes and flags rules where out-of-scope sources are permitted to 
-      access Cardholder Data Environment (CDE) destinations.
-  - 5: "CDE Destination to Out of Scope Source"
-    description: >
-      Identifies rules where CDE destinations are accessible by out-of-scope 
-      sources.
-  - 6: "External IP/Subnet to Internal IP/Subnet"
-    description: >
-      Validates public-to-private rules for proper segregation and secure 
-      communication.
-  - 7: "Internal IP/Subnet to External IP/Subnet"
-    description: >
-      Examines private-to-public rules for compliance and potential data 
-      leakage risks.
-  - 8: "Source-Any to Destination-Any with Services-Any"
-    description: >
-      Flags overly permissive rules where any source communicates with any 
-      destination using any services.
+- 1. Source-Specific to Destination-Any
+
+Validate specific source IPs/subnets against any destination
+Ensure comprehensive source IP validation
+Cover specific or any service configurations
+
+- 2. Source-Specific to Destination-Specific
+
+Verify communication between specific source and destination IPs
+Validate granular service-level access control
+Independent service rule checking
+
+- 3. Source-Any to Destination-Specific
+
+Analyze rules with unrestricted source access
+Identify potential security vulnerabilities
+Assess destination-specific services
+
+- 4. Out of Scope Source to CDE Destination
+
+Flag unauthorized Cardholder Data Environment (CDE) access
+Prevent potential data breaches
+Restrict cross-zone access
+
+- 5. CDE Destination to Out of Scope Source
+
+Identify risky CDE access patterns
+Enforce strict data protection
+Analyze inbound/outbound CDE traffic
+
+- 6. CDE to External Network
+
+Monitor CDE communication with external networks
+Validate external access to sensitive environments
+Ensure strict data protection protocols
+
+- 7. External to CDE Network
+
+Analyze external network attempts to access CDE
+Implement rigorous access control mechanisms
+Prevent unauthorized data exposure
+
+- 8. External to Internal Network
+
+Validate public-to-private network communication
+Ensure robust network segmentation
+Assess perimeter security
+
+- 9. Internal to External Network
+
+Examine private-to-public rules
+Mitigate data leakage risks
+Control outbound traffic
+
+- 10. Overly Permissive Rules
+
+Identify unrestricted access configurations
+Recommend security enhancements
+Evaluate rule permissiveness
  ```
 
 ---
