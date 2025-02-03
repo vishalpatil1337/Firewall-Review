@@ -103,7 +103,7 @@ class FirewallRuleAnalyzer:
     """Class to analyze firewall rules for public/private IP patterns."""
     
     def __init__(self):
-        self.excel_file = "output_external_internal.xlsx"  # Hardcoded filename
+        self.excel_file = "modified_firewall_updated.xlsx"  # Hardcoded filename
         self.ip_analyzer = IPAnalyzer()
         
     def load_rules(self) -> pd.DataFrame:
@@ -208,7 +208,7 @@ class FirewallRuleAnalyzer:
             logging.info("No findings to save")
             return
             
-        output_file = "firewall_analysis_results.xlsx"  # Fixed output filename
+        output_file = "modified_firewall_updated.xlsx"  # Fixed output filename
         
         try:
             findings_df = pd.DataFrame(findings)
