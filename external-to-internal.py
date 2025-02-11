@@ -1,250 +1,199 @@
+"""
+Firewall Rule Checker - External to Internal Analysis Tool
+Analyzes firewall rules for communications between external and internal networks.
+
+Author: Vishal Patil
+Email: vp26781@gmail.com
+"""
+
 import pandas as pd
 import ipaddress
 import re
-from typing import List, Dict, Optional
-from pathlib import Path
-import logging
-from datetime import datetime
-
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(f'firewall_analysis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
-        logging.StreamHandler()
-    ]
-)
+from tabulate import tabulate
+from multiprocessing import Pool, cpu_count
 
 class IPAnalyzer:
-    """Class to handle IP address analysis and validation."""
+    """Handles IP address analysis and validation."""
     
+    # RFC 1918 Private Network Ranges
     PRIVATE_NETWORKS = [
-        ipaddress.ip_network('10.0.0.0/8'),
-        ipaddress.ip_network('172.16.0.0/12'),
-        ipaddress.ip_network('192.168.0.0/16')
+        ipaddress.ip_network('10.0.0.0/8'),      # 10.0.0.0 - 10.255.255.255
+        ipaddress.ip_network('172.16.0.0/12'),   # 172.16.0.0 - 172.31.255.255
+        ipaddress.ip_network('192.168.0.0/16'),  # 192.168.0.0 - 192.168.255.255
     ]
     
-    IP_PATTERN = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:-(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))?')
-    
-    @staticmethod
-    def is_private(ip: str) -> bool:
+    def __init__(self):
+        self.ip_cache = {}  # Cache for IP classification results
+
+    def is_private_ip(self, ip_str: str) -> bool:
         """
-        Check if an IP address is private.
-        
-        Args:
-            ip (str): IP address to check
-            
-        Returns:
-            bool: True if IP is private, False otherwise
+        Check if an IP address or subnet is private according to RFC 1918.
+        Also handles other special-use IPv4 addresses.
         """
         try:
-            ip_obj = ipaddress.ip_address(ip)
-            return any(ip_obj in network for network in IPAnalyzer.PRIVATE_NETWORKS)
+            # Check cache first
+            if ip_str in self.ip_cache:
+                return self.ip_cache[ip_str]
+
+            # Handle both individual IPs and subnets
+            ip_obj = ipaddress.ip_network(ip_str, strict=False)
+            
+            # Check if it's a special use or private address
+            is_private = (
+                any(ip_obj.overlaps(network) for network in self.PRIVATE_NETWORKS) or
+                ip_obj.is_private or
+                ip_obj.is_loopback or
+                ip_obj.is_link_local or
+                ip_obj.is_multicast or
+                ip_obj.is_reserved or
+                ip_obj.is_unspecified
+            )
+
+            # Cache the result
+            self.ip_cache[ip_str] = is_private
+            return is_private
+
         except ValueError:
-            logging.warning(f"Invalid IP address: {ip}")
             return False
 
-    @staticmethod
-    def extract_ips(ip_string: str) -> List[str]:
-        """
-        Extract valid IPs and ranges from a string.
-        
-        Args:
-            ip_string (str): String containing IP addresses and ranges
-            
-        Returns:
-            List[str]: List of extracted IP addresses
-        """
-        matches = IPAnalyzer.IP_PATTERN.findall(ip_string)
-        extracted_ips = []
-        
-        for start_ip, end_ip in matches:
-            end_ip = end_ip or start_ip  # If no end IP, use start IP
-            
-            try:
-                if start_ip != end_ip:
-                    start_ip_obj = ipaddress.ip_address(start_ip)
-                    end_ip_obj = ipaddress.ip_address(end_ip)
-                    
-                    # Limit range size to prevent memory issues
-                    ip_count = int(end_ip_obj) - int(start_ip_obj) + 1
-                    if ip_count > 1000:
-                        logging.warning(f"IP range too large ({ip_count} IPs) for {start_ip}-{end_ip}")
-                        continue
-                        
-                    extracted_ips.extend(
-                        str(ipaddress.ip_address(ip))
-                        for ip in range(int(start_ip_obj), int(end_ip_obj) + 1)
-                    )
-                else:
-                    extracted_ips.append(start_ip)
-                    
-            except ValueError as e:
-                logging.error(f"Error processing IP range {start_ip}-{end_ip}: {e}")
-                continue
-                
-        return extracted_ips
+    def extract_ips(self, text: str) -> list:
+        """Extract IP addresses and subnets from text."""
+        ip_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2})?)'
+        return re.findall(ip_pattern, str(text))
 
-    @staticmethod
-    def find_public_ip(ip_list: List[str]) -> Optional[str]:
-        """
-        Find first public IP from a list of IPs.
-        
-        Args:
-            ip_list (List[str]): List of IP addresses
-            
-        Returns:
-            Optional[str]: First public IP found or None
-        """
-        return next((ip for ip in ip_list if not IPAnalyzer.is_private(ip)), None)
+def process_rule(row, ip_analyzer):
+    """Process a single firewall rule."""
+    excel_row = row['Excel Row']
+    rule_number = row.get('Rule ID', 'N/A')
+    source = str(row['Source'])
+    destination = str(row['Destination'])
+    service = str(row.get('Service', 'N/A'))
 
-class FirewallRuleAnalyzer:
-    """Class to analyze firewall rules for public/private IP patterns."""
+    findings = []
+
+    # Extract IPs
+    source_ips = ip_analyzer.extract_ips(source)
+    dest_ips = ip_analyzer.extract_ips(destination)
+
+    # Analyze source IPs
+    source_public = []
+    source_private = []
+    for ip in source_ips:
+        if ip_analyzer.is_private_ip(ip):
+            source_private.append(ip)
+        else:
+            source_public.append(ip)
+
+    # Analyze destination IPs
+    dest_public = []
+    dest_private = []
+    for ip in dest_ips:
+        if ip_analyzer.is_private_ip(ip):
+            dest_private.append(ip)
+        else:
+            dest_public.append(ip)
+
+    # Check for public to private communication
+    if source_public and dest_private:
+        findings.append({
+            "Type": "Public Source to Private Destination",
+            "Excel Row": excel_row,
+            "Rule Number": rule_number,
+            "Source": source,
+            "Destination": destination,
+            "Service": service,
+            "Public IPs": '\n'.join(source_public),
+            "Private IPs": '\n'.join(dest_private)
+        })
+
+    # Check for private to public communication
+    if source_private and dest_public:
+        findings.append({
+            "Type": "Private Source to Public Destination",
+            "Excel Row": excel_row,
+            "Rule Number": rule_number,
+            "Source": source,
+            "Destination": destination,
+            "Service": service,
+            "Private IPs": '\n'.join(source_private),
+            "Public IPs": '\n'.join(dest_public)
+        })
+
+    return findings
+
+def analyze_rules_parallel(rules_df):
+    """Analyze rules using parallel processing."""
+    # Add Excel row number
+    rules_df['Excel Row'] = rules_df.index + 2
+    rules = rules_df.to_dict(orient='records')
     
-    def __init__(self):
-        self.excel_file = "modified_firewall_updated.xlsx"  # Hardcoded filename
-        self.ip_analyzer = IPAnalyzer()
-        
-    def load_rules(self) -> pd.DataFrame:
-        """Load and validate firewall rules from Excel file."""
-        try:
-            rules_df = pd.read_excel(
-                self.excel_file,
-                usecols="C,D,E",
-                names=['Source', 'Destination', 'Services']
-            )
-            
-            # Basic validation
-            if rules_df.empty:
-                raise ValueError("No rules found in the Excel file")
-            if rules_df.isnull().any().any():
-                logging.warning("Found null values in the rules")
-                
-            return rules_df
-            
-        except Exception as e:
-            logging.error(f"Error loading rules: {e}")
-            raise
-            
-    def analyze_rules(self, rules_df: pd.DataFrame) -> List[Dict]:
-        """
-        Analyze rules for public/private IP patterns.
-        
-        Args:
-            rules_df (pd.DataFrame): DataFrame containing firewall rules
-            
-        Returns:
-            List[Dict]: List of findings
-        """
-        findings = []
-        total_rules = len(rules_df)
-        
-        for index, row in rules_df.iterrows():
-            logging.info(f"Analyzing rule {index + 2}/{total_rules}")
-            
-            try:
-                source_ips = self.ip_analyzer.extract_ips(row['Source'])
-                dest_ips = self.ip_analyzer.extract_ips(row['Destination'])
-                
-                # Skip empty rules
-                if not source_ips or not dest_ips:
-                    logging.warning(f"Empty IPs in row {index + 2}")
-                    continue
-                
-                self._check_rule_pattern(
-                    index, row, source_ips, dest_ips, findings,
-                    not_private_source=True, private_dest=True,
-                    rule_type="Public Source to Private Destination"
-                )
-                
-                self._check_rule_pattern(
-                    index, row, source_ips, dest_ips, findings,
-                    not_private_source=False, private_dest=False,
-                    rule_type="Private Source to Public Destination"
-                )
-                
-            except Exception as e:
-                logging.error(f"Error analyzing rule at row {index + 2}: {e}")
-                continue
-                
-        return findings
-        
-    def _check_rule_pattern(
-        self, index: int, row: pd.Series, source_ips: List[str], 
-        dest_ips: List[str], findings: List[Dict], 
-        not_private_source: bool, private_dest: bool, rule_type: str
-    ) -> None:
-        """Helper method to check specific rule patterns."""
-        source_condition = any(
-            not self.ip_analyzer.is_private(ip) if not_private_source 
-            else self.ip_analyzer.is_private(ip) 
-            for ip in source_ips
-        )
-        
-        dest_condition = any(
-            self.ip_analyzer.is_private(ip) if private_dest 
-            else not self.ip_analyzer.is_private(ip) 
-            for ip in dest_ips
-        )
-        
-        if source_condition and dest_condition:
-            public_ip = self.ip_analyzer.find_public_ip(
-                source_ips if not_private_source else dest_ips
-            )
-            if public_ip:
-                findings.append({
-                    "Rule Type": rule_type,
-                    "Row Number": index + 2,
-                    "Source": row['Source'],
-                    "Destination": row['Destination'],
-                    "Services": row['Services'],
-                    "Public IP": public_ip
-                })
+    # Create IP analyzer instance
+    ip_analyzer = IPAnalyzer()
 
-    def save_results(self, findings: List[Dict]) -> None:
-        """Save analysis results to Excel file."""
-        if not findings:
-            logging.info("No findings to save")
-            return
-            
-        output_file = "output_external_internal.xlsx"  # Fixed output filename
+    # Process rules in parallel
+    with Pool(cpu_count()) as pool:
+        results = pool.starmap(
+            process_rule,
+            [(rule, ip_analyzer) for rule in rules]
+        )
+
+    # Flatten results
+    findings = [finding for result in results for finding in result]
+    return findings
+
+def display_and_save_results(rules_df, findings):
+    """Display and save analysis results."""
+    # Save all rules for reference
+    rules_df.to_excel("all_rules.xlsx", index=False)
+    print("All rules saved to 'all_rules.xlsx'.")
+
+    # Process findings
+    if findings:
+        findings_df = pd.DataFrame(findings)
         
-        try:
-            findings_df = pd.DataFrame(findings)
-            findings_df.to_excel(output_file, index=False)
-            logging.info(f"Results saved to {output_file}")
-        except Exception as e:
-            logging.error(f"Error saving results: {e}")
-            raise
+        # Sort findings by type and row number
+        findings_df = findings_df.sort_values(['Type', 'Excel Row'])
+        
+        # Display findings
+        print("\nFindings:")
+        print(tabulate(findings_df, headers='keys', tablefmt='grid', showindex=False))
+        
+        # Save findings
+        findings_df.to_excel("output_external_internal.xlsx", index=False)
+        print("Findings saved to 'output_external_internal.xlsx'.")
+        
+        # Print summary statistics
+        print("\nSummary by Rule Type:")
+        for rule_type in findings_df['Type'].unique():
+            type_findings = findings_df[findings_df['Type'] == rule_type]
+            print(f"\n{rule_type}:")
+            print(f"Total findings: {len(type_findings)}")
+            print("Affected Rule Numbers:", ', '.join(map(str, type_findings['Rule Number'].unique())))
+    else:
+        print("\nNo findings reported.")
 
 def main():
-    """Main function to run the firewall rule analysis."""
+    """Main execution function."""
     try:
-        analyzer = FirewallRuleAnalyzer()
-        rules_df = analyzer.load_rules()
-        
-        logging.info(f"Analyzing {len(rules_df)} rules...")
-        findings = analyzer.analyze_rules(rules_df)
-        
-        if findings:
-            logging.info(f"Found {len(findings)} rules matching criteria")
-            for finding in findings:
-                logging.info(
-                    f"{finding['Rule Type']}: Row {finding['Row Number']}, "
-                    f"Source: {finding['Source']}, "
-                    f"Destination: {finding['Destination']}, "
-                    f"Services: {finding['Services']}, "
-                    f"Public IP: {finding['Public IP']}"
-                )
-        else:
-            logging.info("No findings reported")
-            
-        analyzer.save_results(findings)
-        
+        excel_file = 'modified_firewall_updated.xlsx'
+
+        print("Loading firewall rules...")
+        rules_df = pd.read_excel(excel_file, header=0).dropna(how='all').drop_duplicates()
+        print(f"Total rules loaded: {rules_df.shape[0]}")
+
+        # Verify Rule ID column exists
+        if 'Rule ID' not in rules_df.columns:
+            print("Warning: 'Rule ID' column not found in Excel file. Using sequential numbers.")
+            rules_df['Rule ID'] = range(1, len(rules_df) + 1)
+
+        print("Analyzing rules...")
+        findings = analyze_rules_parallel(rules_df)
+        display_and_save_results(rules_df, findings)
+
+    except FileNotFoundError as e:
+        print(f"Error: {e}. Please check if required files exist.")
     except Exception as e:
-        logging.error(f"Analysis failed: {e}")
-        raise
+        print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()
