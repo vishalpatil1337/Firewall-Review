@@ -1,3 +1,11 @@
+"""
+Firewall Rule Checker - CDE to External Analysis Tool
+Analyzes firewall rules for communications between CDE and external networks.
+
+Author: Vishal Patil
+Email: vp26781@gmail.com
+"""
+
 import pandas as pd
 import ipaddress
 import re
@@ -8,7 +16,6 @@ def is_public_ip(ip_str):
     """Check if an IP address or subnet is public."""
     try:
         network = ipaddress.ip_network(ip_str, strict=False)
-        # Check if it's not private, loopback, link-local, or multicast
         return not (
             network.is_private or
             network.is_loopback or
@@ -50,25 +57,27 @@ def map_ip_to_ranges(ip_str, network_ranges, range_strings):
         return []
 
 def extract_ips(text):
-    """Extract valid IP addresses and subnets from a given text string."""
+    """Extract valid IP addresses and subnets from text."""
     ip_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2})?)'
     return re.findall(ip_pattern, text)
 
 def process_rule(row, cde_data):
-    """Process a single firewall rule for analysis."""
+    """Process a single firewall rule."""
     excel_row = row['Excel Row']
+    rule_number = row.get('Rule ID', 'N/A')
     source = row['Source']
     destination = row['Destination']
     service = row.get('Service', 'N/A')
 
     cde_ranges, cde_strings = cde_data
 
-    source_items = extract_ips(source)
-    destination_items = extract_ips(destination)
+    # Extract and validate IPs
+    source_ips = extract_ips(source)
+    dest_ips = extract_ips(destination)
 
-    # Get public IPs
-    source_public_ips = [(ip, is_public_ip(ip)) for ip in source_items]
-    dest_public_ips = [(ip, is_public_ip(ip)) for ip in destination_items]
+    # Get public IPs and CDE matches
+    source_public_ips = [(ip, is_public_ip(ip)) for ip in source_ips]
+    dest_public_ips = [(ip, is_public_ip(ip)) for ip in dest_ips]
     
     source_public = any(is_public for _, is_public in source_public_ips)
     dest_public = any(is_public for _, is_public in dest_public_ips)
@@ -76,32 +85,35 @@ def process_rule(row, cde_data):
     source_cde_matches = []
     dest_cde_matches = []
 
-    for item in source_items:
-        source_cde_matches.extend(map_ip_to_ranges(item, cde_ranges, cde_strings))
+    for ip in source_ips:
+        source_cde_matches.extend(map_ip_to_ranges(ip, cde_ranges, cde_strings))
 
-    for item in destination_items:
-        dest_cde_matches.extend(map_ip_to_ranges(item, cde_ranges, cde_strings))
+    for ip in dest_ips:
+        dest_cde_matches.extend(map_ip_to_ranges(ip, cde_ranges, cde_strings))
 
     findings = []
 
+    # Check for public source to CDE destination
     if source_public and dest_cde_matches:
-        # Get all public IPs found in source
         public_ips = [ip for ip, is_public in source_public_ips if is_public]
         findings.append({
-            "Finding_Type": "Public Source to CDE Destination",
+            "Type": "Public Source to CDE Destination",
             "Excel Row": excel_row,
+            "Rule Number": rule_number,
             "Source": source,
             "Destination": destination,
             "Service": service,
             "Public_IP": '\n'.join(public_ips),
             "CDE_Range": '\n'.join(dest_cde_matches)
         })
+
+    # Check for CDE source to public destination
     if source_cde_matches and dest_public:
-        # Get all public IPs found in destination
         public_ips = [ip for ip, is_public in dest_public_ips if is_public]
         findings.append({
-            "Finding_Type": "CDE Source to Public Destination",
+            "Type": "CDE Source to Public Destination",
             "Excel Row": excel_row,
+            "Rule Number": rule_number,
             "Source": source,
             "Destination": destination,
             "Service": service,
@@ -113,34 +125,38 @@ def process_rule(row, cde_data):
 
 def analyze_rules_parallel(rules_df, cde_data):
     """Analyze rules using parallel processing."""
-    rules_df['Excel Row'] = rules_df.index + 2
+    rules_df['Excel Row'] = rules_df.index + 2  # Add Excel row number
     rules = rules_df.to_dict(orient='records')
 
+    # Process rules in parallel
     with Pool(cpu_count()) as pool:
         results = pool.starmap(
             process_rule,
             [(rule, cde_data) for rule in rules]
         )
 
+    # Flatten results
     findings = [finding for result in results for finding in result]
     return findings
 
 def display_and_save_results(rules_df, findings):
-    """Display and save results."""
-    print("\nAll Rules:")
-    print(tabulate(rules_df, headers='keys', tablefmt='fancy_grid', showindex=False))
+    """Display and save analysis results."""
+    # Save all rules
     rules_df.to_excel("all_rules.xlsx", index=False)
     print("All rules saved to 'all_rules.xlsx'.")
 
+    # Display and save findings
     print("\nFindings:")
     findings_df = pd.DataFrame(findings)
     if not findings_df.empty:
         # Sort by Finding_Type
-        findings_df = findings_df.sort_values('Finding_Type')
+        findings_df = findings_df.sort_values('Type')
         
+        # Reorder columns
         column_order = [
-            "Finding_Type",
+            "Type",
             "Excel Row",
+            "Rule Number",
             "Source",
             "Destination",
             "Service",
@@ -151,21 +167,30 @@ def display_and_save_results(rules_df, findings):
         
         # Rename columns for better clarity
         findings_df = findings_df.rename(columns={
-            "Finding_Type": "Finding Type",
-            "Excel Row": "Excel Row",
             "Public_IP": "Public IP/Subnet",
             "CDE_Range": "CDE Range"
         })
         
-        print(tabulate(findings_df, headers='keys', tablefmt='fancy_grid', showindex=False))
+        print(tabulate(findings_df, headers='keys', tablefmt='grid', showindex=False))
         findings_df.to_excel("output_cde-external.xlsx", index=False)
         print("Findings saved to 'output_cde-external.xlsx'.")
+        
+        # Print summary with rule numbers
+        print("\nSummary by Rule Type:")
+        for rule_type in findings_df['Type'].unique():
+            type_findings = findings_df[findings_df['Type'] == rule_type]
+            print(f"\n{rule_type}:")
+            print(f"Total findings: {len(type_findings)}")
+            print("Affected Rule Numbers:", ', '.join(map(str, type_findings['Rule Number'].unique())))
     else:
-        print("  No findings reported.")
+        print("No findings reported.")
 
-def main(excel_file, cde_file):
-    """Main function to load data and analyze rules."""
+def main():
+    """Main execution function."""
     try:
+        excel_file = 'modified_firewall_updated.xlsx'
+        cde_file = 'cde.txt'
+
         print("Loading CDE network ranges...")
         cde_data = load_ip_ranges(cde_file)
         print(f"Loaded {len(cde_data[0])} CDE ranges")
@@ -174,16 +199,19 @@ def main(excel_file, cde_file):
         rules_df = pd.read_excel(excel_file, header=0).dropna(how='all').drop_duplicates()
         print(f"Total rules loaded: {rules_df.shape[0]}")
 
+        # Verify Rule ID column exists
+        if 'Rule ID' not in rules_df.columns:
+            print("Warning: 'Rule ID' column not found in Excel file. Using sequential numbers.")
+            rules_df['Rule ID'] = range(1, len(rules_df) + 1)
+
         print("Analyzing rules...")
         findings = analyze_rules_parallel(rules_df, cde_data)
         display_and_save_results(rules_df, findings)
 
     except FileNotFoundError as e:
-        print(f"Error: {e}. Please check the file paths.")
+        print(f"Error: {e}. Please check if required files exist.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
-    excel_file = input("Enter the Excel file name (with .xlsx): ")
-    cde_file = 'cde.txt'
-    main(excel_file, cde_file)
+    main()
