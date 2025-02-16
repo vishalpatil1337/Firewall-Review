@@ -76,9 +76,8 @@ Requirement 1.4: Install personal firewall software on devices with direct Inter
 
 ## Table of Contents:
 1. [Prerequisites](#prerequisites)
-2. [Installation Instructions](#installation-instructions)
-3. [Usage](#usage)
-4. [Script Steps](#script-steps)
+2. [Usage](#usage)
+3. [Script Flow](#script-flow)
 
 ---
 
@@ -96,19 +95,19 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
 ## Usage:
   To run script:
-   - step_1: "Select the firewall configuration file and generate a report using the Nipper tool"
+   - **step_1:** "Select the firewall configuration file and generate a report using the Nipper tool"
   ![image](https://github.com/user-attachments/assets/307fd3f8-8b16-4e2e-bd00-b88819713d21)
 
-   - step_2: "Save Firewall generated report in HTML and Table to CSV Format"
+   - **step_2:** "Save Firewall generated report in HTML and Table to CSV Format"
   ![image](https://github.com/user-attachments/assets/08a54b8a-8e20-4136-b02a-a31fc28a8fca)
 
-  -  step_3: "After choosing Table to CSV option so many options will come like below given screenshot, Choose only All Network Filtering Tables"
+  -  **step_3:** "After choosing Table to CSV option so many options will come like below given screenshot, Choose only All Network Filtering Tables"
  
 ![image](https://github.com/user-attachments/assets/ed616deb-d207-4be9-a47a-23e853424a97)
 
-  -  step_4: "Install all PreRequirements and Execute the script:"
+  -  **step_4:** "Install all PreRequirements and Execute the script:"
       ```command: "python FW-Review-Starter.py"```
-  -  step_5: Ensure that in fw.xlsx, column C contains the 'Source,' column D contains the 'Destination,' and column E contains the 'Service.
+  -  **step_5:** Ensure that in fw.xlsx, column C contains the 'Source,' column D contains the 'Destination,' and column E contains the 'Service.
 - **Name:** `FW.xlsx`
 - **Format:** Excel Workbook (.xlsx)
 - **Required Column Structure:**
@@ -174,22 +173,51 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
 ---
 
-## Script_Steps:
 ## Script Workflow
 
-| Script Name                     | Description |
-|----------------------------------|-------------|
-| **startup.py**                   | Initializes firewall configuration and generates required text files (cde.txt, oos.txt, etc.). |
-| **format-changer.py**            | Converts firewall CSV files into Excel format for better readability and processing. |
-| **all-in-one.maker-groups.py**    | Merges multiple firewall address groups into a single group for streamlined management. |
-| **replace.py**                   | Finds and replaces group names in the firewall configuration to ensure consistency. |
-| **replace-ao.py**                 | Updates address objects in the modified firewall configuration file. |
-| **Source and Destination Rules Check** | Verifies firewall rules, including Source-Any, Destination-Any, and other predefined categories. |
-| **cde-oos-subnet-extractor.py**   | Converts subnet ranges into individual IP addresses for validation. |
-| **CDE-OOS-Checker**               | Validates compliance of CDE and OOS rules from an Excel file. |
-| **external-to-internal.py**       | Analyzes public-to-private firewall rules and generates security reports. |
+| File | Purpose | Contents |
+|------|---------|----------|
+| CDE-OOS-Checker.py | CDE/OOS Analysis | Boundary violations |
+| cde-to-external.py | CDE to External Analysis | CDE to external network communications |
+| Source-any--Destination-Any--Services-Any.py | Any Rule Analysis | Unrestricted access patterns |
+| Source-Any--Destination-Specific--Services-Any-Specific.py | Source Any Analysis | Source access patterns |
+| Source-Specific--Destination-Any--Services-Any-Specific.py | Destination Any Analysis | Destination access patterns |
+| Source-Specific--Destination-Specific--Services-Any.py | Service Any Analysis | Service access patterns |
+| external-to-internal.py | Network Analysis | Public/Private network analysis |
+| all-in-one-maker-groups.py | Group Analysis | Consolidated group information |
+| format-changer.py | Format Conversion | Converts CSV to XLSX format |
+| formating-findings.py | Findings Formatting | Formats and consolidates findings |
+| FW-Review-Starter.py | Rule Analysis | Executes complete analysis workflow |
+| startup.py | Initialization | Creates directory structure and initializes files |
+
 
 Each script executes in sequence, with prompts ensuring proper execution flow.
+
+---
+
+## Troubleshooting Guide
+
+### Common Issues
+
+#### 1. File Errors
+- **Issue:** "File not found"
+  
+  Solution: Check file existence and permissions
+  Verify path: ./FW/modified_firewall_updated.xlsx
+
+
+- **Issue:** "Column not found"
+  
+  Solution: Verify column positions (C,D,E)
+  Check header names exactly match requirements
+
+
+#### 2. Processing Errors
+- **Issue:** "Memory Error"
+  
+  Solution: Reduce chunk size in analysis
+  Close other applications
+
 
 
 ---
