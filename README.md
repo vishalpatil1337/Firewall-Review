@@ -121,7 +121,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
 > ⚠️ **Critical**: Column positions (C, D, E) are mandatory and must not be changed
 
-### IP Range Definition Files
+  -  **step_6:** Ensure that cde.txt and oos.txt are filled with subnets or IP addresses
 
 #### CDE Ranges (`cde.txt`)
 ```plaintext
