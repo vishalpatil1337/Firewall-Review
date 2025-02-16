@@ -108,8 +108,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
   -  step_4: "Install all PreRequirements and Execute the script:"
       ```command: "python FW-Review-Starter.py"```
-
-     ### Main Configuration File
+  -  step_5: Ensure that in fw.xlsx, column C contains the 'Source,' column D contains the 'Destination,' and column E contains the 'Service.
 - **Name:** `FW.xlsx`
 - **Format:** Excel Workbook (.xlsx)
 - **Required Column Structure:**
