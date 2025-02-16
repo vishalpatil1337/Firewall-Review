@@ -108,6 +108,36 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
   -  step_4: "Install all PreRequirements and Execute the script:"
       ```command: "python FW-Review-Starter.py"```
+
+     ### Main Configuration File
+- **Name:** `FW.xlsx`
+- **Format:** Excel Workbook (.xlsx)
+- **Required Column Structure:**
+
+| Position | Column | Header | Content | Required |
+|----------|--------|---------|----------|-----------|
+| C | Column C | Source | Source IP/Network | Yes |
+| D | Column D | Destination | Destination IP/Network | Yes |
+| E | Column E | Service | Service/Port | Yes |
+| Any | Any | Rule ID | Rule Identifier | Optional |
+
+> ⚠️ **Critical**: Column positions (C, D, E) are mandatory and must not be changed
+
+### IP Range Definition Files
+
+#### CDE Ranges (`cde.txt`)
+```plaintext
+# Format: One entry per line
+10.1.0.0/16
+172.16.1.0/24
+```
+
+#### OOS Ranges (`oos.txt`)
+```plaintext
+# Format: One entry per line
+192.168.1.0/24
+10.2.0.0/16
+```
   
 
 
@@ -124,12 +154,24 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 
 3. **Output Files Generated**  
    Based on your inputs, the script will generate the following `.xlsx` output files:
-   - `output_cde-oos-findings.xlsx`
-   - `output_Source-Any--Destination-Any--Services-Any.xlsx`
-   - `output_Source-Any--Destination-Specific--Services-Any-Specific.xlsx`
-   - `output_Source-Specific--Destination-Any--Services-Any-Specific.xlsx`
-   - `output_Source-Specific--Destination-Specific--Services-Any.xlsx`
-   - `output_external_internal.xlsx`
+
+| File | Purpose | Contents |
+|------|---------|----------|
+| output_cde-oos-findings.xlsx | CDE/OOS Analysis | Boundary violations |
+| output_external_internal.xlsx | Network Analysis | Public/Private communications |
+| output_Source-Any--Destination-Any--Services-Any.xlsx | Any Rule Analysis | Unrestricted access patterns |
+| output_Source-Any--Destination-Specific--Services-Any-Specific.xlsx | Source Any Analysis | Source access patterns |
+| output_Source-Specific--Destination-Any--Services-Any-Specific.xlsx | Destination Any Analysis | Destination access patterns |
+| output_Source-Specific--Destination-Specific--Services-Any.xlsx | Service Any Analysis | Service access patterns |
+
+### 2. Supporting Files
+
+| File | Purpose | Contents |
+|------|---------|----------|
+| all-in-one.xlsx | Group Analysis | Consolidated groups |
+| all_rules.xlsx | Complete Analysis | Full rule assessment |
+| modified_firewall.xlsx | Processing | Intermediate results |
+| modified_firewall_updated.xlsx | Final Rules | Processed configurations |
 
 ---
 
