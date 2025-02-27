@@ -92,6 +92,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
   pip install xlsxwriter
   pip install prettytable
   pip install colorama
+  pip install tabulate
 
 ## Usage:
   To run script:
