@@ -40,23 +40,13 @@ class SubnetExtractor:
     def extract_ips_from_subnet(self, subnet: str) -> Set[str]:
         """
         Extract all IP addresses from a subnet.
-        For large networks, only includes network, broadcast, and boundary addresses.
+        Includes all addresses regardless of subnet size.
         """
         try:
             ip_network = ipaddress.IPv4Network(subnet, strict=False)
             
-            # For large networks, only include network address, broadcast address,
-            # and first/last usable addresses
-            if ip_network.num_addresses > 1024:
-                self.logger.warning(f"Large subnet detected ({subnet}). Including only boundary addresses.")
-                return {
-                    str(ip_network.network_address),
-                    str(ip_network[1]),                    # First usable
-                    str(ip_network[-2]),                   # Last usable
-                    str(ip_network.broadcast_address)
-                }
-            
-            # For smaller networks, include all addresses
+            # Include all addresses for all networks, regardless of size
+            self.logger.info(f"Processing subnet {subnet} with {ip_network.num_addresses} addresses")
             return {str(ip) for ip in ip_network}
             
         except ValueError as e:
@@ -66,18 +56,15 @@ class SubnetExtractor:
     def expand_ip_range(self, start_ip: str, end_ip: str) -> Set[str]:
         """
         Expand an IP range into individual addresses.
-        For large ranges, only includes boundary addresses.
+        Includes all addresses regardless of range size.
         """
         try:
             start = ipaddress.IPv4Address(start_ip)
             end = ipaddress.IPv4Address(end_ip)
             
-            # Check if range is too large
+            # Include all addresses for all ranges, regardless of size
             num_ips = int(end) - int(start) + 1
-            if num_ips > 1024:
-                self.logger.warning(f"Large IP range detected ({start_ip}-{end_ip}). Including only boundary addresses.")
-                return {str(start), str(start + 1), str(end - 1), str(end)}
-            
+            self.logger.info(f"Processing IP range {start_ip}-{end_ip} with {num_ips} addresses")
             return {str(ipaddress.IPv4Address(ip)) for ip in range(int(start), int(end) + 1)}
             
         except ValueError as e:
