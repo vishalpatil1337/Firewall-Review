@@ -118,7 +118,7 @@ Before running the **Firewall Rule Checker** script, ensure you have the followi
 | C | Column C | Source | Source IP/Network | Yes |
 | D | Column D | Destination | Destination IP/Network | Yes |
 | E | Column E | Service | Service/Port | Yes |
-| Any | Any | Rule ID | Rule Identifier | Optional |
+| Any | Any | Rule ID | Rule Identifier | Yes |
 
 > ⚠️ **Critical**: Column positions (C, D, E) are mandatory and must not be changed
 
